@@ -7,7 +7,7 @@ $ cd test
 git clone <clone URL>
 clone URL : https://github.com/nanobottom/nonaka.git
 
-# リモートリポジトリをローカルに反映させる
+# リモートリポジトリをローカルに同期させる
 $ git pull origin master
 
 # リモートリポジトリに変更を反映する/ファイルを追加する
@@ -16,7 +16,7 @@ $ git add ファイル名
 2. コミット
 $ git commit -m "メッセージ"
 3.プッシュ
-$ git push
+$ git push origin master
 
 # 現在のブランチを変更する
 $ git branch
@@ -39,5 +39,5 @@ $ git add .
 3. コミット
 $ git commit -m "メッセージ"
 4. プッシュ
-$ git push
+$ git push origin master
 
