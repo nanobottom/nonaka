@@ -1,4 +1,4 @@
-# gitのcloneを作成する
+# リモートリポジトリをクローンする
 1. ディレクトリを作成する
 $ mkdir test
 2. ディレクトリに移動する
@@ -6,7 +6,8 @@ $ cd test
 3. クローン
 git clone <clone URL>
 clone URL : https://github.com/nanobottom/nonaka.git
-# GitHubに変更を反映する/ファイルを追加する
+
+# リモートリポジトリに変更を反映する/ファイルを追加する
 1. ステージング
 $ git add ファイル名
 2. コミット
