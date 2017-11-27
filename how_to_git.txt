@@ -25,6 +25,12 @@ $ git branch
 # ブランチを変更する
 $ git checkout ブランチ名
 
+# ブランチを作成する
+$ git branch ブランチ名
+
+# ブランチを削除する
+$ git branch -d ブランチ名
+
 # ログを確認する
 $ git log -n 数値
 
