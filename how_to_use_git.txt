@@ -1,0 +1,53 @@
+# リモートリポジトリをローカルに複製する(svn:チェックアウト)
+1. ディレクトリを作成する
+$ mkdir test
+2. ディレクトリに移動する
+$ cd test
+3. クローン
+git clone <clone URL>
+clone URL : https://github.com/nanobottom/nonaka.git
+
+# リモートリポジトリをローカルに同期させる(svn:更新)
+$ git pull origin master
+
+# リモートリポジトリに変更を反映する/ファイルを追加する
+(コミット+プッシュ->svn:コミット)
+1. ステージング
+$ git add ファイル名
+2. コミット
+$ git commit -m "メッセージ"
+3.プッシュ
+$ git push origin master
+
+# 現在のブランチを変更する
+$ git branch
+
+# ブランチを変更する
+$ git checkout ブランチ名
+
+# ブランチを作成する
+$ git branch ブランチ名
+
+# ブランチを削除する
+$ git branch -d ブランチ名
+
+# ログを確認する
+$ git log -n 数値
+
+# ステージングしているファイルを確認する（コミットしてないファイルなど）
+$ git status
+
+# ステージングしているファイルを削除する
+$ git reset ファイル名
+
+# GitHubから要らないファイルを削除する
+1. ローカルファイルを削除
+$ git rm ファイル名
+$ git rm -r ディレクトリ名
+2. ステージング
+$ git add .
+3. コミット
+$ git commit -m "メッセージ"
+4. プッシュ
+$ git push origin master
+
