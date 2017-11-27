@@ -43,12 +43,14 @@ set nocompatible
 "set backspace=indent,eol,start
 set ruler
 set backspace=2
-"カラースキーム
 syntax on
+"カラースキーム
 "colorscheme hybrid
 "colorscheme solarized
 colorscheme darkblue
 "colorscheme jellybeans
+"colorscheme molokai
+"colorscheme evening
 "全角文字の幅を2に固定
 set ambiwidth=double
 "背景色
@@ -74,5 +76,8 @@ inoremap {<Enter> {}<Left><CR><ESC><S-o>
 inoremap ( ()<ESC>i
 inoremap (<Enter> ()<Left><CR><ESC><S-o>
 "関数元にジャンプ
+nnoremap <C-h> :vsp<CR> :exe("tjump ".expand('<cword>'))<CR>
+nnoremap <C-k> :split<CR> :exe("tjump ".expand('<cword>'))<CR>
+"複数宣言元が見つかった場合にリストにして選択できるようにする
 nnoremap <C-h> :vsp<CR> :exe("tjump ".expand('<cword>'))<CR>
 nnoremap <C-k> :split<CR> :exe("tjump ".expand('<cword>'))<CR>
