@@ -2,3 +2,9 @@
 <C-p>/<C-n>
 # 関数元にジャンプ
 <C-]>/<C-h>/<C-k>
+#cygwinでのctagのインストール方法
+http://codaholic.org/?p=1874
+# インデントをつける
+< Shift-> >/< Shift-< >
+# 直前の操作を取り消す
+U
