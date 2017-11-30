@@ -70,7 +70,6 @@ nnoremap j gj
 nnoremap gj j
 "{記入後に改行すると}を補完
 inoremap { {}<LEFT>
-inoremap < <><LEFT>
 inoremap ( ()<LEFT>
 inoremap { {}<Left>
 inoremap {<Enter> {}<Left><CR><ESC><S-o>
