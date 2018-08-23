@@ -2,7 +2,7 @@
 from bottle import route, template, request, response
 from bottle import jinja2_template as template2
 import json
-from req_res_data import RequestData, ResponseData
+from req_res_data import RequestData, ResponseJSONData, ResponseData
 
 @route('/hello/<name>', method = 'GET')
 def hello(name):
@@ -27,8 +27,11 @@ def post():
     req_data = RequestData(request)
     req_data.display_info()
     
-    # response
+    # response(in case of sending JSON data))
+    #res_data = ResponseJSONData(response)
+    #res_data.set_param()
+
     res_data = ResponseData(response)
-    res_data.set_param()
+    res_data.set_param_to_body()
 
     return res_data.response

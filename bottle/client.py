@@ -29,7 +29,8 @@ def main():
         + ':' + inifile.get('settings', 'port') + '/post' 
         , the_bytearray)
 
-    pprint.pprint(response.json())
+    #pprint.pprint(response.json())
+    print(response.text)
 
 if __name__ == '__main__':
     main()
