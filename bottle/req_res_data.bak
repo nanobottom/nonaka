@@ -4,7 +4,7 @@ inifile = configparser.ConfigParser()
 inifile.read('./config.ini', 'UTF-8')
 class WebData:
 
-    def __init__(self):
+    def __init__(self)
        self.body = bytearray()
 
     def hexdump_body(self):
@@ -26,12 +26,23 @@ class WebData:
         param.extend(zero_lst)
         return param
 
-class RequestData(WebData):
+class RequestData:
 
     def __init__(self, request):
         self.request = request
         self.body = request.body.read()
         
+    def hexdump_body(self):
+        count = 1
+        for i in self.body:
+            if count % 16 == 0:
+                print('%02x \n' % i, end = '')
+            else:
+                print('%02x ' % i, end = '')
+            if len(self.body) == count:
+                print('\n')
+            count += 1
+
     def display_info(self):
         
         print('<リクエストを受信しました>')
@@ -55,33 +66,46 @@ class ResponseJSONData:
 
     def __init__(self, response):
         self.response = response
-        self.JSON_filename = 'res_data.json'
+        self.body_filename = 'res_data.json'
+
+    def set_param(self): 
+        with open(self.body_filename, 'r') as f:
+            json_data = json.load(f)
+            self.response.body = json.dumps(json_data)
         self.response.status = 200
         self.response.content_type = 'application/json'
 
-    def set_param(self): 
-        with open(self.JSON_filename, 'r') as f:
-            json_data = json.load(f)
-            self.response.body = json.dumps(json_data)
-
-class ResponseData(WebData):
+class ResponseData:
 
     def __init__(self, response = 0):
-        WebData.__init__(self)
         self.response = response
-        self.response.status = 200
-        self.response.content_type = 'text/plain'
+        self.body = bytearray()
 
     def set_param_to_body(self):
         # name
-        self.body.extend(self.str_to_ascii(inifile.get('response', 'name'), 100))
+        name = [ord(s) for s in inifile.get('response', 'name')]
+        # 20bytesの内、埋まらなかった箇所に0x00を付加
+        zero_lst = [0] * (20 - len(name))
+        name.extend(zero_lst)
+        self.body.extend(name)
+
         # address
-        self.body.extend(self.str_to_ascii(inifile.get('response', 'address'), 100))
+        address = [ord(s) for s in inifile.get('response', 'address')]
+        # 100bytesの内、埋まらなかった箇所に0x00を付加
+        zero_lst = [0] * (100 - len(address))
+        address.extend(zero_lst)
+        self.body.extend(address)
         
         # age
         self.body.append(int(inifile.get('response', 'age')))
         
         # birthday
-        self.body.extend(self.str_to_ascii(inifile.get('response', 'birthday'), 20))
+        birthday = [ord(s) for s in inifile.get('response', 'birthday')]
+        # 20bytesの内、埋まらなかった箇所に0x00を付加
+        zero_lst = [0] * (20 - len(birthday))
+        birthday.extend(zero_lst)
+        self.body.extend(birthday)
         # bytearrayをファイルオブジェクトとして扱うためにio.BytesIOを使用する
         self.response.body = io.BytesIO(self.body)
+        self.response.status = 200
+        self.response.content_type = 'text/plain'

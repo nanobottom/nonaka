@@ -30,7 +30,7 @@ def main():
         , the_bytearray)
 
     #pprint.pprint(response.json())
-    print(response.text)
+    print(response.content)
 
 if __name__ == '__main__':
     main()
