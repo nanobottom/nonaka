@@ -42,7 +42,7 @@ class WebData:
 
     def str_to_ascii(self, string, size):
          
-        param = [ord(s) for s in string]
+        param = bytearray(string, 'ASCII')
         # <size>bytesの内、埋まらなかった箇所に0x00を付加
         zero_lst = [0] * (size - len(param))
         param.extend(zero_lst)
@@ -57,9 +57,9 @@ class RequestData(WebData):
     def display_info(self):
         
         print('<Receive HTTP Request>')
-        print('form parameter : {}'.format(self.request.params))
+        # print('form parameter : {}'.format(self.request.params))
         print('HTTP method : {}'.format(self.request.method))
-        print('HTTP header : {}'.format(self.request.headers))
+        # print('HTTP header : {}'.format(self.request.headers))
         print('Message body:')
         self.hexdump_body()
         print('URL : {}'.format(self.request.url))
@@ -101,13 +101,13 @@ class ResponseData(WebData):
     def set_param_to_body(self):
         # name
         name = inifile.get('response', 'name')
-        self.body.extend(self.str_to_ascii(name, 100))
+        self.body.extend(self.str_to_ascii(string = name, size = 100))
         # address
         address = inifile.get('response', 'address')
         self.body.extend(self.str_to_ascii(address, 100))
         # age
         age = inifile.get('response', 'age')
-        self.body.append(int(age))
+        self.body.extend(int(age).to_bytes(2, 'little'))
         # birthday
         birthday = inifile.get('response', 'birthday')
         self.body.extend(self.str_to_ascii(birthday, 20))
