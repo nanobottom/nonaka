@@ -96,14 +96,16 @@ class ResponseData(WebData):
 
     def set_param_to_body(self):
         # name
-        self.body.extend(self.str_to_ascii(inifile.get('response', 'name'), 100))
+        name = inifile.get('response', 'name')
+        self.body.extend(self.str_to_ascii(name, 100))
         # address
-        self.body.extend(self.str_to_ascii(inifile.get('response', 'address'), 100))
-        
+        address = inifile.get('response', 'address')
+        self.body.extend(self.str_to_ascii(address, 100))
         # age
-        self.body.append(int(inifile.get('response', 'age')))
-        
+        age = inifile.get('response', 'age')
+        self.body.append(int(age))
         # birthday
-        self.body.extend(self.str_to_ascii(inifile.get('response', 'birthday'), 20))
+        birthday = inifile.get('response', 'birthday')
+        self.body.extend(self.str_to_ascii(birthday, 20))
         # bytearrayをファイルオブジェクトとして扱うためにio.BytesIOを使用する
         self.response.body = io.BytesIO(self.body)
