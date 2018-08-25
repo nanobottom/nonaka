@@ -8,14 +8,36 @@ class WebData:
        self.body = bytearray()
 
     def hexdump_body(self):
+        print('%08x  ' % 0, end = '')
         count = 1
+        s = '|'
         for i in self.body:
-            if count % 16 == 0:
-                print('%02x \n' % i, end = '')
+            print('%02x ' % i, end = '') 
+            # ASCII文字の範囲外なら'.'文字を表示
+            if i in range(32, 127): 
+                s += chr(i)
             else:
-                print('%02x ' % i, end = '')
-            if len(self.body) == count:
-                print('\n')
+                s += ' '
+            
+            # スペースと座標、文字部分を整形する 
+            if count % 16 == 0:
+                s += '|'
+                print(' %s\n%08x  ' % (s, count), end = '')
+                s = '|'
+            elif count % 8 == 0:
+                print(' ', end = '')
+
+            # 最後のスペースを整形する
+            if len(self.body) == count :
+                if  (16 - count % 16) < 8:
+                    add_space = ' '
+                else:
+                    add_space = '  '
+                space = '   ' * (16 - count % 16) + add_space
+                s += ' ' * (16 - count % 16)
+                s += '|' 
+                print(space, end = '')
+                print(s)
             count += 1
 
     def str_to_ascii(self, string, size):
