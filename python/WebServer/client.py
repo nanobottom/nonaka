@@ -1,36 +1,25 @@
 import pprint
 import requests
 import configparser
+from web_data import WebData
 inifile = configparser.ConfigParser()
 inifile.read('./config.ini', 'UTF-8')
 def main():
-    ascii_lst = []
-    ascii_str = 'http://test/'
-    for s in ascii_str:
-        ascii_lst.append(ord(s))
-    # 100bytesの内、埋まらなかった箇所に0x00を付加
-    zero_lst = [0] * (100 - len(ascii_lst))
-    ascii_lst.extend(zero_lst)
-
+    URL = 'http://' + inifile.get('settings', 'host') + ':' + inifile.get('settings', 'port') + '/post'
+    web_data = WebData()
+    ascii_lst = web_data.str_to_ascii('http://localhost:8080/test',100) 
     blist = [1, 2, 3, 255, 77, 89, 90]
     blist.extend(ascii_lst)
-    count = 1
-    for i in blist:
-        if count % 16 == 0:
-            print('%02x \n' % i, end = '')
-        else:
-            print('%02x ' % i, end = '')
-            if len(blist) == count:
-                print('\n')
-        count += 1
     the_bytearray = bytearray(blist)
-    response = requests.post(
-        'http://' + inifile.get('settings', 'host')
-        + ':' + inifile.get('settings', 'port') + '/post' 
-        , the_bytearray)
+    response = requests.post(URL, the_bytearray)
 
     #pprint.pprint(response.json())
+    print('Message body :')
     print(response.content)
-
+    print('URL : {} '.format(response.url))
+    print('Status code : {} '.format(response.status_code))
+    print('Date : {} '.format(response.headers['date']))
+    print('Server : {} '.format(response.headers['server']))
+    print('Content-Type : {} '.format(response.headers['content-type']))
 if __name__ == '__main__':
     main()
