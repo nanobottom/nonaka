@@ -1,17 +1,13 @@
 import pprint
 import requests
 import configparser
-from web_data import WebData
+from web_data import ClientRequestData
 inifile = configparser.ConfigParser()
 inifile.read('./config.ini', 'UTF-8')
 def main():
     URL = 'http://' + inifile.get('settings', 'host') + ':' + inifile.get('settings', 'port') + '/post'
-    web_data = WebData()
-    testURL = web_data.str_to_ascii('http://localhost:8080/test',100) 
-    request_body = [1, 2, 3, 255, 77, 89, 90]
-    request_body.extend(testURL)
-    the_bytearray = bytearray(request_body)
-    response = requests.post(URL, the_bytearray)
+    request_data = ClientRequestData()
+    response = requests.post(URL,request_data.set_param_to_body() )
 
     #pprint.pprint(response.json())
     print('Message body :')

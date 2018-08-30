@@ -41,22 +41,56 @@ class WebData:
             count += 1
 
     def str_to_ascii(self, string, size):
-         
         param = bytearray(string, 'ASCII')
         # <size>bytesの内、埋まらなかった箇所に0x00を付加
         zero_lst = [0] * (size - len(param))
         param.extend(zero_lst)
         return param
 
+    def get_little_endian(self, offset, size):
+        b = self.body[offset : offset + size]
+        return str(int.from_bytes(b,'little'))
+
+    def get_big_endian(self, offset, size):
+        b = self.body[offset : offset + size]
+        return str(int.from_bytes(b,'big'))
+
+    def get_str(self, offset, size):
+        b = self.body[offset : offset + size]
+        strings = ''
+        for s in b:
+            strings += chr(s)
+        return strings
+class ClientRequestData(WebData):
+
+    def __init__(self, request = 0):
+        self.request = request
+        self.body = bytearray()
+
+    def set_param_to_body(self):
+        # name
+        name = inifile.get('request', 'name')
+        self.body.extend(self.str_to_ascii(string = name, size = 100))
+        # address
+        address = inifile.get('request', 'address')
+        self.body.extend(self.str_to_ascii(address, 100))
+        # age
+        age = inifile.get('request', 'age')
+        self.body.extend(int(age).to_bytes(2, 'little'))
+        # birthday
+        birthday = inifile.get('request', 'birthday')
+        self.body.extend(self.str_to_ascii(birthday, 20))
+        # bytearrayをファイルオブジェクトとして扱うためにio.BytesIOを使用する
+        return io.BytesIO(self.body)
 class RequestData(WebData):
 
-    def __init__(self, request):
+    def __init__(self, request = 0):
         self.request = request
         self.body = request.body.read()
         
-    def display_info(self):
+    def display_header_info(self):
         
-        print('<Receive HTTP Request>')
+        print('---<request header>---')
         # print('form parameter : {}'.format(self.request.params))
         print('HTTP method : {}'.format(self.request.method))
         # print('HTTP header : {}'.format(self.request.headers))
@@ -76,6 +110,12 @@ class RequestData(WebData):
         print('From : {}'.format(self.request.get_header('From')))
         print('Date : {}'.format(self.request.get_header('Date')))
 
+    def display_body_info(self):
+        print('---<request message body>---')
+        print('名前      : {}'.format(self.get_str(0,100)))
+        print('アドレス  : {}'.format(self.get_str(100,100)))
+        print('年齢      : {}'.format(self.get_little_endian(200,2)))
+        print('誕生日    : {}'.format(self.get_str(202,20)))
 
 class ResponseJSONData:
 
@@ -113,3 +153,4 @@ class ResponseData(WebData):
         self.body.extend(self.str_to_ascii(birthday, 20))
         # bytearrayをファイルオブジェクトとして扱うためにio.BytesIOを使用する
         self.response.body = io.BytesIO(self.body)
+        

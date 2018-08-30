@@ -25,7 +25,8 @@ def display_login_value():
 def post():
     # request
     req_data = RequestData(request)
-    req_data.display_info()
+    req_data.display_header_info()
+    req_data.display_body_info()
     
     # response(in case of sending JSON data))
     #res_data = ResponseJSONData(response)
