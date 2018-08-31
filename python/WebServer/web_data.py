@@ -61,25 +61,36 @@ class WebData:
         for s in b:
             strings += chr(s)
         return strings
+
+    def set_little_endian(self, offset, size, param_str):
+        self.body[offset : offset + size] = (int(param_str).to_bytes(size, 'little'))
+
+    def set_big_endian(self, offset, size, param_str):
+        self.body[offset : offset + size] = (int(param_str).to_bytes(size, 'big'))
+
+    def set_str(self, offset, size, param_str):
+        self.body[offset : offset + size] = self.str_to_ascii(string = param_str, size = size)
+
 class ClientRequestData(WebData):
 
     def __init__(self, request = 0):
         self.request = request
-        self.body = bytearray()
+        self.body_size = 222
+        self.body = bytearray(self.body_size)
 
     def set_param_to_body(self):
         # name
         name = inifile.get('request', 'name')
-        self.body.extend(self.str_to_ascii(string = name, size = 100))
+        self.set_str(0, 100, name)
         # address
         address = inifile.get('request', 'address')
-        self.body.extend(self.str_to_ascii(address, 100))
+        self.set_str(100, 100, address)
         # age
         age = inifile.get('request', 'age')
-        self.body.extend(int(age).to_bytes(2, 'little'))
+        self.set_little_endian(200, 2, age)
         # birthday
         birthday = inifile.get('request', 'birthday')
-        self.body.extend(self.str_to_ascii(birthday, 20))
+        self.set_str(202, 20, birthday)
         # bytearrayをファイルオブジェクトとして扱うためにio.BytesIOを使用する
         return io.BytesIO(self.body)
 class RequestData(WebData):
@@ -135,22 +146,24 @@ class ResponseData(WebData):
     def __init__(self, response = 0):
         WebData.__init__(self)
         self.response = response
+        self.body_size = 222
+        self.body = bytearray(self.body_size)
         self.response.status = 200
         self.response.content_type = 'text/plain'
 
     def set_param_to_body(self):
         # name
         name = inifile.get('response', 'name')
-        self.body.extend(self.str_to_ascii(string = name, size = 100))
+        self.set_str(0, 100, name)
         # address
         address = inifile.get('response', 'address')
-        self.body.extend(self.str_to_ascii(address, 100))
+        self.set_str(100, 100, address)
         # age
         age = inifile.get('response', 'age')
-        self.body.extend(int(age).to_bytes(2, 'little'))
+        self.set_little_endian(200, 2, age)
         # birthday
         birthday = inifile.get('response', 'birthday')
-        self.body.extend(self.str_to_ascii(birthday, 20))
+        self.set_str(202, 20, birthday)
         # bytearrayをファイルオブジェクトとして扱うためにio.BytesIOを使用する
         self.response.body = io.BytesIO(self.body)
         
