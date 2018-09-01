@@ -13,7 +13,7 @@ class WebData:
         s = '|'
         for i in self.body:
             print('%02x ' % i, end = '') 
-            # ASCII文字の範囲外なら'.'文字を表示
+            # ASCII文字の範囲外なら' '文字を表示
             if i in range(32, 127): 
                 s += chr(i)
             else:
@@ -79,18 +79,25 @@ class ClientRequestData(WebData):
         self.body = bytearray(self.body_size)
 
     def set_param_to_body(self):
+        offset, size = 0, 100
         # name
         name = inifile.get('request', 'name')
-        self.set_str(0, 100, name)
+        self.set_str(offset, size, name)
+        offset +=size
         # address
+        size = 100
         address = inifile.get('request', 'address')
-        self.set_str(100, 100, address)
+        self.set_str(offset, size, address)
+        offset +=size
         # age
+        size = 2
         age = inifile.get('request', 'age')
-        self.set_little_endian(200, 2, age)
+        self.set_little_endian(offset, size, age)
+        offset +=size
         # birthday
+        size = 20
         birthday = inifile.get('request', 'birthday')
-        self.set_str(202, 20, birthday)
+        self.set_str(offset, size, birthday)
         # bytearrayをファイルオブジェクトとして扱うためにio.BytesIOを使用する
         return io.BytesIO(self.body)
 class RequestData(WebData):
@@ -152,18 +159,25 @@ class ResponseData(WebData):
         self.response.content_type = 'text/plain'
 
     def set_param_to_body(self):
+        offset, size = 0, 100
         # name
         name = inifile.get('response', 'name')
-        self.set_str(0, 100, name)
+        self.set_str(offset, size, name)
+        offset +=size
         # address
+        size = 100
         address = inifile.get('response', 'address')
-        self.set_str(100, 100, address)
+        self.set_str(offset, size, address)
+        offset +=size
         # age
+        size = 2
         age = inifile.get('response', 'age')
-        self.set_little_endian(200, 2, age)
+        self.set_little_endian(offset, size, age)
+        offset +=size
         # birthday
+        size = 20
         birthday = inifile.get('response', 'birthday')
-        self.set_str(202, 20, birthday)
+        self.set_str(offset, size, birthday)
         # bytearrayをファイルオブジェクトとして扱うためにio.BytesIOを使用する
         self.response.body = io.BytesIO(self.body)
         
