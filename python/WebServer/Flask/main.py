@@ -1,8 +1,11 @@
 from flask import Flask, request, render_template, make_response
-from web_data import RequestData, ResponseData
+from webdata import RequestData, ResponseData
 import configparser
+import os
+current_dir = os.path.dirname(os.path.abspath(__file__))
+conf_path = os.path.join(current_dir, 'config.ini')
 conf = configparser.ConfigParser()
-conf.read('./config.ini', 'UTF-8')
+conf.read(conf_path, 'UTF-8')
 
 app = Flask(__name__)
 response_data = ResponseData()
