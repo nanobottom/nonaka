@@ -65,7 +65,7 @@ class WebData:
             strings += chr(s)
         return strings
 
-        def get_bit(bits, digit):
+        def get_bit(self, bits, digit):
             digit -= 1
             return bin(int(bin(bits >> digit), 2) & 0b1)
 
@@ -87,7 +87,7 @@ class WebData:
         if param_str != "":
             self.data[offset : offset + size] = self.str_to_ascii(param_str, size)
 
-        def set_bit(offset, digit, change_bit):
+        def set_bit(self, offset, digit, change_bit):
             bits = self.data[offset : offset + 1]
             digit -= 1
             and_bits = (0b11111110, 0b11111101, 0b11111011, 0b11110111, 0b11101111, 0b11011111, 0b10111111, 0b01111111)
