@@ -24,9 +24,11 @@ def post():
     request_data = RequestData(request)
     request_data.display_header_info()
     request_data.display_data_info()
+    request_data.error_check()
 
     response_data.response = make_response()
     response_data.set_header_info()
+    response_data.response.status_code = request_data.response_status_code
 
     if response_data.is_setting_from_web == 0:
         response_data.store_data()

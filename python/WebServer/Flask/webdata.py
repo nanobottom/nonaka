@@ -70,9 +70,9 @@ class WebData:
             strings += chr(s)
         return strings
 
-        def get_bit(self, bits, digit):
-            digit -= 1
-            return bin(int(bin(bits >> digit), 2) & 0b1)
+    def get_bit(self, bits, digit):
+        digit -= 1
+        return bin(int(bin(bits >> digit), 2) & 0b1)
 
     def set_little_endian(self, offset, size, param_str):
         if param_str != "":
@@ -92,16 +92,21 @@ class WebData:
         if param_str != "":
             self.data[offset : offset + size] = self.str_to_ascii(param_str, size)
 
-        def set_bit(self, offset, digit, change_bit):
-            bits = self.data[offset : offset + 1]
-            digit -= 1
-            and_bits = (0b11111110, 0b11111101, 0b11111011, 0b11110111, 0b11101111, 0b11011111, 0b10111111, 0b01111111)
-            or_one_bits = (0b1, 0b10, 0b100, 0b1000, 0b10000, 0b100000, 0b1000000, 0b10000000)
+    def set_bit(self, offset, digit, change_bit):
+        bits = self.data[offset : offset + 1]
+        digit -= 1
+        and_bits = (0b11111110, 0b11111101, 0b11111011, 0b11110111, 0b11101111, 0b11011111, 0b10111111, 0b01111111)
+        or_one_bits = (0b1, 0b10, 0b100, 0b1000, 0b10000, 0b100000, 0b1000000, 0b10000000)
 
-            if change_bit == 0:
-                self.data[offset : offset + 1] = bin(bits & and_bits[digit])
-            elif change_bit == 1:
-                self.data[offset : offset + 1] = bin(bits & and_bits[digit] | or_one_bits[digit])
+        if change_bit == 0:
+            self.data[offset : offset + 1] = bin(bits & and_bits[digit])
+        elif change_bit == 1:
+            self.data[offset : offset + 1] = bin(bits & and_bits[digit] | or_one_bits[digit])
+
+    def range_check(self, param, param_name, begin, end):
+        if (param in range(begin, end)) == False:
+            print('Parameter {} is over range of num.'.format(param_name))
+        self.response_status_code = 400
 
 class ClientRequestData(WebData):
 
@@ -137,7 +142,8 @@ class RequestData(WebData):
     def __init__(self, request = 0):
         self.request = request
         self.data = request.data
-        
+        self.response_status_code = 200
+
     def display_header_info(self):
         
         print('---<Request header>---')
@@ -163,6 +169,57 @@ class RequestData(WebData):
         print('address            : {}'.format(self.get_str(100,100)))
         print('age                : {}'.format(self.get_little_endian(200,2)))
         print('birthday           : {}'.format(self.get_str(202,20)))
+
+    def name_offset(self):
+        return 0
+
+    def name_size(self):
+        return 100
+
+    def get_name(self):
+        return self.get_str(self.name_offset(), self.name_size())
+
+    def set_name(self, param_str):
+        self.set_str(self.name_offset(), self.name_size(), param_str)
+        
+    def address_offset(self):
+        return self.name_offset() + self.name_size()
+
+    def address_size(self):
+        return 100
+
+    def get_address(self):
+        return self.get_str(self.address_offset(), self.address_size())
+
+    def set_address(self, param_str):
+        self.set_str(self.address_offset(), self.address_size(), param_str)
+
+    def age_offset(self):
+        return self.address_offset() + self.address_size()
+
+    def age_size(self):
+        return 2
+
+    def get_age(self):
+        return self.get_little_endian(self.age_offset(), self.age_size())
+
+    def set_age(self, param_str):
+        self.set_little_endian(self.age_offset(), self.age_size(), param_str)
+
+    def birthday_offset(self):
+        return self.age_offset() + self.age_size()
+
+    def birthday_size(self):
+        return 20
+
+    def get_birthday(self):
+        return self.get_str(self.birthday_offset(), self.birthday_size())
+
+    def set_birthday(self, param_str):
+        self.set_str(self.birthday_offset(), self.birthday_size(), param_str)
+    def error_check(self):
+        age = int(self.get_age())
+        self.range_check(age, 'age' , 20, 80)
 
 class ResponseJSONData:
 
@@ -257,13 +314,6 @@ class ResponseData(WebData):
     def set_data(self):
         self.response.data = self.data
 
-    def range_check(param, param_name, begin, end):
-        try:
-            if (param in range(begin, end)) == False:
-                raise ValueError('Parameter {} is over range of num.'.format(param_name))
-        except ValueError as e:
-            print("ValueError : {}".format(e))
-            self.response.status_code = 400
 
 if __name__ == '__main__':
     response_data = ResponseData()
