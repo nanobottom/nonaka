@@ -2,9 +2,14 @@ from flask import Flask, request, render_template, make_response
 from webdata import RequestData, ResponseData
 import configparser
 import os
+conf = configparser.ConfigParser()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 conf_path = os.path.join(current_dir, 'config.ini')
-conf = configparser.ConfigParser()
+try:
+    if os.path.exists(conf_path) == False:
+        raise SystemError('Missing "config.ini" file at {}.'.format(current_dir))
+except SystemError as e:
+    print("SystemError : {}".format(e))
 conf.read(conf_path, 'UTF-8')
 
 app = Flask(__name__)

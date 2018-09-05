@@ -4,6 +4,11 @@ import os
 conf = configparser.ConfigParser()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 conf_path = os.path.join(current_dir, 'config.ini')
+try:
+    if os.path.exists(conf_path) == False:
+        raise SystemError('Missing "config.ini" file at {}.'.format(current_dir))
+except SystemError as e:
+    print("SystemError : {}".format(e))
 conf.read(conf_path, 'UTF-8')
 class WebData:
 
@@ -248,8 +253,17 @@ class ResponseData(WebData):
         self.set_birthday(birthday)
         
         self.is_setting_from_web = 0
+
     def set_data(self):
         self.response.data = self.data
+
+    def range_check(param, param_name, begin, end):
+        try:
+            if (param in range(begin, end)) == False:
+                raise ValueError('Parameter {} is over range of num.'.format(param_name))
+        except ValueError as e:
+            print("ValueError : {}".format(e))
+            self.response.status_code = 400
 
 if __name__ == '__main__':
     response_data = ResponseData()
