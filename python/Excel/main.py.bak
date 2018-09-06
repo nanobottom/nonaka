@@ -1,0 +1,80 @@
+import openpyxl, datetime, locale, calendar
+from openpyxl.styles import Border, Side, PatternFill, Alignment
+current_year = 2018
+current_month = 1
+current_day = 1
+filename = '作業進捗表.xlsx'
+item = ('項目', '開始', '終了', '開始', '終了', '工数', '担当')
+work_book = openpyxl.Workbook()
+sheet_name = str(current_year) + '年' 
+work_sheet = work_book.create_sheet(sheet_name)
+
+class EditCell:
+
+    def __init__(self, work_sheet, column_str, row_str, value, cell_color):
+        self.ws = work_sheet
+        self.column = column_str
+        self.row = row_str
+        self.value = value
+        self.cell_color = cell_color
+
+    # セルの枠線の設定
+    def set_border(self):
+        return Border(left   = Side(border_style = 'thin', color = 'FF000000'),
+                      right  = Side(border_style = 'thin', color = 'FF000000'),
+                      top    = Side(border_style = 'thin', color = 'FF000000'),
+                      bottom = Side(border_style = 'thin', color = 'FF000000')
+                      )
+    # 値、セルの塗りつぶし、セルの幅、中央揃え、枠線を設定する
+    def edit(self, column_width = 8.11, row_height = 13.2):
+
+        cell_name = self.column + self.row
+        current_ws = self.ws[cell_name]
+        current_ws.value = self.value
+        current_ws.fill = PatternFill(fill_type = 'solid', fgColor = self.cell_color) # セルの塗りつぶし
+        current_ws.border = self.set_border()
+        self.ws.column_dimensions[self.column].width = column_width
+        self.ws.row_dimensions[int(self.row)].height = row_height
+        current_ws.alignment = Alignment(horizontal = 'center', vertical = 'bottom')
+
+# 項目のセル編集
+work_sheet.merge_cells("A1:A3")
+a1 = EditCell(work_sheet, 'A', '1', '項目', 'FFAAD8E6')
+a1.edit(column_width = 30)
+
+# 予定のセル編集
+work_sheet.merge_cells("B1:C2")
+a1 = EditCell(work_sheet, 'B', '1', '予定', 'FFAAD8E6')
+a1.edit()
+
+# 実績のセル編集
+work_sheet.merge_cells("D1:E2")
+a1 = EditCell(work_sheet, 'D', '1', '実績', 'FFAAD8E6')
+a1.edit()
+# 行列表記でセルに値を入れる
+for i_column, i_item in enumerate(item, start=1):
+    work_sheet.cell(row = 3, column = i_column, value = i_item)
+
+for i_month in range(1, 13):
+# シートを生成する
+    date = datetime.datetime(current_year, current_month, current_day)
+    (_, last_day) = calendar.monthrange(current_year, current_month)
+
+    for i_day in range(1,last_day):
+        # 年月日を取得する
+        year = date.year
+        month = date.month
+        day = date.day
+
+        # 日付の文字列からその日付の曜日を取得する
+        locale.setlocale(locale.LC_TIME, 'ja_JP.UTF-8')
+        day_of_the_week = date.strftime('%a')
+        day_of_the_week_index = int(date.strftime('%w'))
+        
+
+        print('Processing: {0}年{1}月{2}日({3})'.format(year, month, day, day_of_the_week))
+        date = date + datetime.timedelta(days = 1)
+    current_month += 1
+
+# ファイル保存
+work_book.save(filename)
