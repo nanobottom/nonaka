@@ -3,7 +3,8 @@ from openpyxl import load_workbook
 from openpyxl.styles import Border, Side, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 current_year = 2018
-current_month = 1
+current_month = 4
+fin_month_interval = 1
 white_row_num = 30
 main_column_num = 7
 filename = '作業進捗表.xlsx'
@@ -18,7 +19,7 @@ except SystemError as e:
     work_book = openpyxl.Workbook()
 else:
     work_book = load_workbook(filename)
-sheet_name = str(current_year) + '年' 
+sheet_name = str(current_year) + '年' + str(current_month) + '月'
 work_sheet = work_book.create_sheet(sheet_name)
 
 class EditCell:
@@ -133,8 +134,12 @@ work_sheet.freeze_panes = 'H1'
 
 date = datetime.datetime(current_year, current_month, 1)
 column_count = main_column_num + 1
-for i_month in range(current_month, 13):
-    (_, last_day) = calendar.monthrange(current_year, i_month)
+for i_month in range(current_month, current_month + fin_month_interval):
+    move_up_year = i_month // 12
+    if move_up_year > 0 and i_month % 12 != 0:
+        i_month -= move_up_year * 12
+        print(i_month)
+    (_, last_day) = calendar.monthrange(current_year + move_up_year, i_month)
 
     for i_day in range(1,last_day + 1):
         # 年月日を取得する
