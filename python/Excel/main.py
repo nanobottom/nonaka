@@ -5,9 +5,10 @@ from openpyxl.utils import get_column_letter
 from editcell import EditCell
 current_year = 2018
 current_month = 4
-fin_month_interval = 12
+fin_month_interval = 1
 white_row_num = 30
-main_column_num = 7
+main_column_num = 8
+project_num = 3
 filename = '作業進捗表.xlsx'
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -44,14 +45,14 @@ ghostwhite    = 'FFF8F8FF'
 darkorange    = 'FFFF8C00'
 yellow        = 'FFFFD700'
 
-# 項目(A1)のセル編集
+# 番号(A1)のセル編集
 work_sheet.merge_cells("A1:A3")
-a1 = EditCell(work_sheet, 1, 1, '項目')
+a1 = EditCell(work_sheet, 1, 1, '番号')
 a1.edit_font(bold = True)
 a1.edit_border_left()
 a1.edit_border_top()
 a1.edit_border_right()
-a1.edit_height_width(width = 30)
+a1.edit_height_width(width = 6)
 a1.edit_fill(fgColor = paleturquoise)
 a1.edit_alignment()
 
@@ -64,108 +65,107 @@ a3.edit_border_left()
 a3.edit_border_right()
 a3.edit_border_bottom()
 
-# 予定(B1)のセル編集
-work_sheet.merge_cells("B1:C2")
-b1 = EditCell(work_sheet, 2, 1, '予定')
+# 項目(B1)のセル編集
+work_sheet.merge_cells("B1:B3")
+b1 = EditCell(work_sheet, 2, 1, '項目')
 b1.edit_font(bold = True)
 b1.edit_border_left()
 b1.edit_border_top()
+b1.edit_border_right()
+b1.edit_height_width(width = 30)
 b1.edit_fill(fgColor = paleturquoise)
 b1.edit_alignment()
 
 b2 = EditCell(work_sheet, 2, 2)
 b2.edit_border_left()
-b2.edit_border_bottom()
+b2.edit_border_right()
 
-c1 = EditCell(work_sheet, 3, 1)
-c1.edit_border_right()
+b3 = EditCell(work_sheet, 2, 3)
+b3.edit_border_left()
+b3.edit_border_right()
+b3.edit_border_bottom()
+# 予定(C1)のセル編集
+work_sheet.merge_cells("C1:D2")
+c1 = EditCell(work_sheet, 3, 1, '予定')
+c1.edit_font(bold = True)
+c1.edit_border_left()
 c1.edit_border_top()
+c1.edit_fill(fgColor = paleturquoise)
+c1.edit_alignment()
 
 c2 = EditCell(work_sheet, 3, 2)
-c2.edit_border_right()
+c2.edit_border_left()
 c2.edit_border_bottom()
 
-# 実績(D1)のセル編集
-work_sheet.merge_cells("D1:E2")
-d1 = EditCell(work_sheet, 4, 1, '実績')
-d1.edit_font(bold = True)
-d1.edit_border_left()
+d1 = EditCell(work_sheet, 4, 1)
+d1.edit_border_right()
 d1.edit_border_top()
-d1.edit_fill(fgColor = paleturquoise)
-d1.edit_alignment()
 
 d2 = EditCell(work_sheet, 4, 2)
-d2.edit_border_left()
+d2.edit_border_right()
 d2.edit_border_bottom()
 
-e1 = EditCell(work_sheet, 5, 1)
-e1.edit_border_right()
+# 実績(E1)のセル編集
+work_sheet.merge_cells("E1:F2")
+e1 = EditCell(work_sheet, 5, 1, '実績')
+e1.edit_font(bold = True)
+e1.edit_border_left()
 e1.edit_border_top()
+e1.edit_fill(fgColor = paleturquoise)
+e1.edit_alignment()
 
 e2 = EditCell(work_sheet, 5, 2)
-e2.edit_border_right()
+e2.edit_border_left()
 e2.edit_border_bottom()
 
-#開始(B3)のセル編集
-b3 = EditCell(work_sheet, 2, 3, '開始')
-b3.edit_font(bold = True)
-b3.edit_fill(fgColor = paleturquoise)
-b3.edit_height_width(width = 6)
-b3.edit_alignment()
-b3.edit_border_round()
+f1 = EditCell(work_sheet, 6, 1)
+f1.edit_border_right()
+f1.edit_border_top()
 
-#終了(C3)のセル編集
-c3 = EditCell(work_sheet, 3, 3, '終了')
+f2 = EditCell(work_sheet, 6, 2)
+f2.edit_border_right()
+f2.edit_border_bottom()
+
+#開始(C3)のセル編集
+c3 = EditCell(work_sheet, 3, 3, '開始')
 c3.edit_font(bold = True)
 c3.edit_fill(fgColor = paleturquoise)
 c3.edit_height_width(width = 6)
 c3.edit_alignment()
 c3.edit_border_round()
 
-#開始(D3)のセル編集
-d3 = EditCell(work_sheet, 4, 3, '開始')
+#終了(D3)のセル編集
+d3 = EditCell(work_sheet, 4, 3, '終了')
 d3.edit_font(bold = True)
 d3.edit_fill(fgColor = paleturquoise)
 d3.edit_height_width(width = 6)
 d3.edit_alignment()
 d3.edit_border_round()
 
-#終了(E3)のセル編集
-e3 = EditCell(work_sheet, 5, 3, '終了')
+#開始(E3)のセル編集
+e3 = EditCell(work_sheet, 5, 3, '開始')
 e3.edit_font(bold = True)
 e3.edit_fill(fgColor = paleturquoise)
 e3.edit_height_width(width = 6)
 e3.edit_alignment()
 e3.edit_border_round()
 
-#工数(F1)のセル編集
-work_sheet.merge_cells("F1:F3")
-f1 = EditCell(work_sheet, 6, 1, '工数')
-f1.edit_font(bold = True)
-f1.edit_border_left()
-f1.edit_border_top()
-f1.edit_border_right()
-f1.edit_height_width(width = 6)
-f1.edit_fill(fgColor = paleturquoise)
-f1.edit_alignment()
+#終了(F3)のセル編集
+f3 = EditCell(work_sheet, 6, 3, '終了')
+f3.edit_font(bold = True)
+f3.edit_fill(fgColor = paleturquoise)
+f3.edit_height_width(width = 6)
+f3.edit_alignment()
+f3.edit_border_round()
 
-f2 = EditCell(work_sheet, 6, 2)
-f2.edit_border_left()
-f2.edit_border_right()
-
-f3 = EditCell(work_sheet, 6, 3)
-f3.edit_border_left()
-f3.edit_border_right()
-f3.edit_border_bottom()
-
-
-#状態(G1)のセル編集
+#工数(G1)のセル編集
 work_sheet.merge_cells("G1:G3")
-g1 = EditCell(work_sheet, 7, 1, '状態')
+g1 = EditCell(work_sheet, 7, 1, '工数')
 g1.edit_font(bold = True)
 g1.edit_border_left()
 g1.edit_border_top()
 g1.edit_border_right()
+g1.edit_height_width(width = 6)
 g1.edit_fill(fgColor = paleturquoise)
 g1.edit_alignment()
 
@@ -178,6 +178,26 @@ g3.edit_border_left()
 g3.edit_border_right()
 g3.edit_border_bottom()
 
+
+#状態(H1)のセル編集
+work_sheet.merge_cells("H1:H3")
+h1 = EditCell(work_sheet, 8, 1, '状態')
+h1.edit_font(bold = True)
+h1.edit_border_left()
+h1.edit_border_top()
+h1.edit_border_right()
+h1.edit_fill(fgColor = paleturquoise)
+h1.edit_alignment()
+
+h2 = EditCell(work_sheet, 8, 2)
+h2.edit_border_left()
+h2.edit_border_right()
+
+h3 = EditCell(work_sheet, 8, 3)
+h3.edit_border_left()
+h3.edit_border_right()
+h3.edit_border_bottom()
+
 #白枠（4行目以降）の編集
 for i_row in range(4, white_row_num + 4):
     for i_column in range(1, main_column_num + 1):
@@ -187,7 +207,7 @@ for i_row in range(4, white_row_num + 4):
         white.edit_border_round()
 
 # 列の固定
-work_sheet.freeze_panes = 'H1'
+work_sheet.freeze_panes = 'I1'
 
 date = datetime.datetime(current_year, current_month, 1)
 column_count = main_column_num + 1
@@ -258,8 +278,25 @@ for i_month in range(current_month, current_month + fin_month_interval):
 
 # 工数の数式（全日程の時間の合計を算出する）を代入する
 for i_row in range(4,white_row_num + 4):
-    numerical_formula ='=SUM(H'+str(i_row)+':'+get_column_letter(column_count - 1)+str(i_row)+')'
-    work_sheet.cell(row = i_row, column = 6).value = numerical_formula
+    numerical_formula_sum ='=SUM(I'+str(i_row)+':'+get_column_letter(column_count - 1)+str(i_row)+')'
+    work_sheet.cell(row = i_row, column = 7).value = numerical_formula_sum
+
+# プロジェクト毎の工数を算出する
+for i_project in range(1, project_num + 1):
+    numerical_formula_sumif = '=SUMIF(A4:A' + str(white_row_num + 4) + ',' + str(i_project) + ',G4:G' + str(white_row_num + 4) + ')'
+    p_title_cell = EditCell(work_sheet, i_project + 2, white_row_num + 6, 'P' + str(i_project) )
+    p_title_cell.edit_font(bold = True)
+    p_title_cell.edit_fill(fgColor = paleturquoise)
+    p_title_cell.edit_alignment()
+    p_title_cell.edit_border_round()
+
+    nf_cell = EditCell(work_sheet, i_project + 2, white_row_num + 7, numerical_formula_sumif)
+    nf_cell.edit_font(bold = True)
+    nf_cell.edit_fill(fgColor = ghostwhite)
+    nf_cell.edit_alignment()
+    nf_cell.edit_border_round()
+
+
 
 work_book.save(filename)
 print('Finish!')
