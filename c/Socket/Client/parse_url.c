@@ -1,33 +1,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define BUF_LEN 256
+#define BUF_LEN 2048 /*IEでのURLの最大文字数を採用*/
+#include "socket_tool.h"
+#include "parse_url.h"
 
-struct URL{
-  char scheme[BUF_LEN];
-  char host[BUF_LEN];
-  char path[BUF_LEN];
-  unsigned short port;
-};
 
-int parse_url(const char *url_str, struct URL *url){
 
-  char scheme[BUF_LEN];
-  char hostpath[BUF_LEN];
+int parse_url(const char *url_str, struct URL *url, char *error){
+
+  char scheme[BUF_LEN] = "";
+  char hostpath[BUF_LEN] = "";
   char *phostpath = hostpath;
-  char host_and_port[BUF_LEN];
-  char host[BUF_LEN];
-  char path[BUF_LEN];
+  char host_and_port[BUF_LEN] = "";
+  char host[BUF_LEN] = "";
+  char path[BUF_LEN] = "";
+  char ip_addr[BUF_LEN] = "";
+  char *pip_addr = ip_addr;
   char *ppath = path;
-  char error[BUF_LEN];
-  char *p;
-  printf("URL: %s\n", url_str);
+  char *p = NULL;
+  printf("URLをparseします...\n");
+  printf("解析するURL: %s\n", url_str);
+  
+  if (strlen(url_str) > BUF_LEN){
+    strcpy(error, "URLが長過ぎます。\n");
+    return -1;
+  }
   /* schemeを取得する */
   strcpy(scheme, url_str);
   strtok(scheme, ":");
   strcpy(url->scheme, scheme);
   if (strcmp(url->scheme,"http") != 0 && strcmp(url->scheme, "https") != 0){
-    printf("schemeがhttp/httpsではありません。\n");
+    strcpy(error, "schemeがhttp/httpsではありません。\n");
     return -1;
   }
   printf("scheme: %s\n", url->scheme);
@@ -52,16 +56,33 @@ int parse_url(const char *url_str, struct URL *url){
   printf("host: %s\n", url->host);
   printf("port: %d\n", url->port);
 
+  /*ip_addrを取得する*/
+  pip_addr = hostname_to_ip_str(url->host);
+  strcpy(url->ip_addr, pip_addr);
+  printf("ip_addr: %s\n", url->ip_addr);
+  url->ip_addr_net = hostname_to_network_byteorder(url->host);
+  printf("ip_addr_net: %X\n", url->ip_addr_net);
+
   /* pathを取得する*/
   ppath = strchr(phostpath, '/');
-  strcpy(url->path, ppath);
+  if (ppath == NULL){
+    printf("pathが見つからないため\"/\"に設定します。\n");
+    strcpy(url->path, "/");
+  }else{
+    strcpy(url->path, ppath);
+  }
   printf("path: %s\n", url->path);
   return 0;
 }
-
+/*
 int main(){
   struct URL url;
+  char error[256];
+  char *perror = error;
   char url_str[] = "https://www.google.com/file";
-  parse_url(url_str, &url);
+  memset(&url, 0, sizeof(url));
+  parse_url(url_str, &url, perror);
+  printf(perror);
   return 0;
 }
+*/

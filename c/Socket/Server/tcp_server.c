@@ -20,15 +20,15 @@ int main(){
 
 
   int send_msg(int sock, char *msg){
-      int len;
-      int result;
-      len = strlen(msg);
-      result = write(sock, msg, len);
-      if (result != len){
-        fprintf(stderr, "writing error.");
-      }
-      return len;
+    int len;
+    int result;
+    len = strlen(msg);
+    result = send(sock, msg, len, 0);
+    if (result != len){
+      fprintf(stderr, "writing error.");
     }
+    return len;
+  }
   /* ソケットの作成 */
   /* AF_INET: IPv4インターネットプロトコル */
   /* SOCK_STREAM: WWW, telnet, FTPなど*/

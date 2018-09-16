@@ -1,6 +1,6 @@
 # Makefile
-program = tcp_server
-obj = tcp_server.o socket_tool.o
+program = tcp_client
+obj = tcp_client.o parse_url.o socket_tool.o
 CC = gcc
 
 $(program): $(obj)
@@ -8,7 +8,7 @@ $(program): $(obj)
 
 .SUFFIXES: .c .o
 .c.o:
-	$(CC) -c $<
+	$(CC) -c -g $<
 .PHONY: clean
 clean:
 	$(RM) $(program) $(obj)
