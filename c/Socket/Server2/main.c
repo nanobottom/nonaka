@@ -17,6 +17,66 @@ char *hostname_to_ip_addr(char *hostname){
   ip_str = inet_ntoa(addr.sin_addr);
   return ip_str;
 }
+// Hexdump
+void hexdump(int *arr, int arr_size)
+{
+  char c[256] = "|";
+  char buf[256] = "";
+  int count = 0;
+  for(int i = 0; i < arr_size; i++)
+  {
+    // If arr is range of ASCII...
+    if (arr[i] > 31 && arr[i] < 127)
+    {
+      strcpy(buf, c);
+      snprintf(c, 256, "%s%c", buf, (char)arr[i]);
+    }
+    else
+    {
+      strcpy(buf, c);
+      snprintf(c, 256, "%s%s", buf, ".");
+    }
+
+    if(i == 0)
+    {
+      printf("%08X  ",i);
+      printf("%02X ", arr[i]);
+    }
+    else if((i+1) % 16 == 0 && i != 0 )
+    {
+      strcpy(buf, c);
+      snprintf(c, 256, "%s%s", buf, "|\n");
+      printf("%02X  ", arr[i]);
+      printf("%s",c);
+      printf("%08X  ",i + 1);
+      strcpy(c, "|");
+    }
+    else if((i+1) % 8 == 0)
+    {
+      printf("%02X  ", arr[i]);
+    }
+    else
+    {
+      printf("%02X ", arr[i]);
+    }
+    count = i + 1;
+  }
+  //Create blank part.
+  for(int i = 0; i < (16 - count % 16); i++ )
+  {
+    printf("   ");
+    strcpy(buf,c);
+    snprintf(c, 256, "%s ", buf);
+
+  }
+  if((16- count % 16) > 8)
+  {
+    printf("  ");
+  }
+  strcpy(buf,c);
+  snprintf(c, 256, "%s|\n", buf);
+  printf("%s", c);
+}
 
 // Change hostname to network byte order of IP address.
 int hostname_to_ip_net(char *hostname){
@@ -82,12 +142,12 @@ int server_process(int client_fd){
 
   //Extract request body.
   p = strstr(recv_data, "\r\n\r\n") + 4;
-  for (int chr_i = 0; chr_i < (strlen(p) -1); chr_i++){
-    data_array[chr_i] = (int)p[chr_i];
-    printf("%02X ", data_array[chr_i]);
+  if(strlen(p) != 0){
+    for (int chr_i = 0; chr_i < (strlen(p) -1); chr_i++){
+      data_array[chr_i] = (int)p[chr_i];
+    }
+    hexdump(data_array, sizeof(data_array)/sizeof(data_array[0]));
   }
-  printf("%s\n", p); 
-
   //Response message.
   pres_data = "HTTP/1.1 200 OK\n";
   if(send(client_fd, pres_data, strlen(pres_data), 0) < 0){
@@ -147,16 +207,16 @@ int main(){
 
   printf("Binding server socket...\n");
   if (bind(server_fd, (struct sockaddr *)&sin, sizeof(sin)) < 0){
-      fprintf(stderr, "Failed to bind server socket.\n");
-      close(server_fd);
-      exit(EXIT_FAILURE);
+    fprintf(stderr, "Failed to bind server socket.\n");
+    close(server_fd);
+    exit(EXIT_FAILURE);
   }
   
   //listen: Making status of waiting connection request from client.
   if (listen(server_fd, SOMAXCONN) < 0){
-      fprintf(stderr, "Failed to listen client socket.\n");
-      close(server_fd);
-      exit(EXIT_FAILURE);
+    fprintf(stderr, "Failed to listen client socket.\n");
+    close(server_fd);
+    exit(EXIT_FAILURE);
   }
   printf("%s listening port %d...\n", SERVER_NAME, SERVER_PORT);
 
