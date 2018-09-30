@@ -18,7 +18,7 @@ char *hostname_to_ip_addr(char *hostname){
   return ip_str;
 }
 // Hexdump
-void hexdump(int *arr, int arr_size)
+void hexdump(char *arr, int arr_size)
 {
   char c[256] = "|";
   char buf[256] = "";
@@ -29,7 +29,7 @@ void hexdump(int *arr, int arr_size)
     if (arr[i] > 31 && arr[i] < 127)
     {
       strcpy(buf, c);
-      snprintf(c, 256, "%s%c", buf, (char)arr[i]);
+      snprintf(c, 256, "%s%c", buf, arr[i]);
     }
     else
     {
@@ -106,8 +106,8 @@ int server_process(int client_fd){
        url[BUF_SIZE] = "", protocol[BUF_SIZE] = "", res_data[BUF_SIZE] = "";
   char buf[BUF_SIZE] = "";
   char *pres_data = res_data;
+  //int data_array[BUF_SIZE] = {0};
   char *p = NULL;
-  int data_array[BUF_SIZE] = {0};
   int length = 0;
 
   length = read(client_fd, recv_data, BUF_SIZE);
@@ -117,7 +117,6 @@ int server_process(int client_fd){
   }
 
   //Extract top line message.
-  printf("%s\n", recv_data);
   strcpy(buf, recv_data);
   strtok(buf, "\r\n");
 
@@ -143,10 +142,11 @@ int server_process(int client_fd){
   //Extract request body.
   p = strstr(recv_data, "\r\n\r\n") + 4;
   if(strlen(p) != 0){
-    for (int chr_i = 0; chr_i < (strlen(p) -1); chr_i++){
-      data_array[chr_i] = (int)p[chr_i];
-    }
-    hexdump(data_array, sizeof(data_array)/sizeof(data_array[0]));
+    //for (int chr_i = 0; chr_i < (strlen(p) -1); chr_i++){
+    //  data_array[chr_i] = (int)p[chr_i];
+    //}
+    //hexdump(data_array, sizeof(data_array)/sizeof(data_array[0]));
+    hexdump(p, strlen(p)- 1);
   }
   //Response message.
   pres_data = "HTTP/1.1 200 OK\n";
