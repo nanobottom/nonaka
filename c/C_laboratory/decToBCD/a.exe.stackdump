@@ -1,0 +1,7 @@
+Exception: STATUS_ACCESS_VIOLATION at eip=611645C5
+eax=0062D51C ebx=00000037 ecx=00000000 edx=00000036 esi=611D1E40 edi=00000036
+ebp=611D1E40 esp=0062CAD0 program=C:\cygwin\home\ryo\C\C_laboratory\decToBCD\a.exe, pid 7056, thread main
+cs=0023 ds=002B es=002B fs=0053 gs=002B ss=002B
+Stack trace:
+Frame     Function  Args
+End of stack trace
