@@ -11,15 +11,19 @@ def scraping_code_from_yahoo_finance(URL):
     for name_tag in soup.find_all(class_ = "normal yjSt"):
         names.append(name_tag.string)
     return codes, names
+"""        
+    for close_tag in soup.find_all(class_ = "txtright bold"):
+        closes.append(float(close_tag.string.replace(",", "")))
+"""
+
     
 
 if __name__ == "__main__":
 
     URL1 = "https://info.finance.yahoo.co.jp/ranking/?kd=1&mk=1&tm=d&vl=a" 
     URL2 = "https://info.finance.yahoo.co.jp/ranking/?kd=1&tm=d&vl=a&mk=1&p=2" 
-    codes = scraping_code_from_yahoo_finance(URL1)
-    codes2 = scraping_code_from_yahoo_finance(URL2)
+    codes, names = scraping_code_from_yahoo_finance(URL1)
+    codes2, names2 = scraping_code_from_yahoo_finance(URL2)
     codes.extend(codes2)
-    print(codes)
 
         
