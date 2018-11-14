@@ -2,6 +2,7 @@
 import requests, datetime
 from bs4 import BeautifulSoup
 from stock_share import StockShare
+from getpass import getpass
 
 class ScrapingFromKabuCom:
     
@@ -17,9 +18,8 @@ class ScrapingFromKabuCom:
         self.holdings_url = "https://s20.si1.kabu.co.jp/ap/PC/Stocks/Stock/Position/List?actType=TOKUTEI"
         self.holdings_info = []
         
-    def input_password(self):
-        print("Input password>>", end = "")
-        self.login_info["SsLogonPassword"] = input()
+    def enter_password(self):
+        self.login_info["SsLogonPassword"] = getpass('Enter password>>')
         
     def login(self):
         self.session.post(self.login_url, data = self.login_info)
@@ -85,7 +85,7 @@ class ScrapingFromKabuCom:
         
 if __name__ == "__main__":
     scraping_kabu_com = ScrapingFromKabuCom()
-    scraping_kabu_com.input_password()
+    scraping_kabu_com.enter_password()
     scraping_kabu_com.login()
     scraping_kabu_com.get_holdings_info()
     scraping_kabu_com.plt()

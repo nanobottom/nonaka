@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import requests, re, datetime
+import requests, re, datetime, os
 from bs4 import BeautifulSoup
 from stock_share import StockShare
+from getpass import getpass
 
 class ScrapingFromToredabi:
     
@@ -17,9 +18,8 @@ class ScrapingFromToredabi:
         self.holdings_info = []
         self.session = requests.session()
         
-    def input_password(self):
-        print("Input password>>", end = "")
-        self.login_info["password"] = input()
+    def enter_password(self):
+        self.login_info["password"] = getpass('Enter password>>')
     
     def login(self):
         self.session.post(self.login_url, data = self.login_info)
@@ -43,16 +43,29 @@ class ScrapingFromToredabi:
     
     def plt(self):
         today = datetime.date.today()
+        script_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)))
+        success_dir = os.path.join(script_dir, "toredabi", "success")
+        failure_dir = os.path.join(script_dir, "toredabi", "failure")
         for holding_info in self.holdings_info:
             stock_share = StockShare(holding_info["code"], today.strftime("%Y-%m-%d"))
             print(holding_info["name"])
-            stock_share.plt()
+            # 画像を保存するディレクトリに移動する
+
+            if float(holding_info["profit_or_loss_ratio"]) > 5:
+                os.chdir(success_dir)
+                stock_share.plt(is_savefig = True)
+            elif float(holding_info["profit_or_loss_ratio"]) < -3:
+                os.chdir(failure_dir)
+                stock_share.plt(is_savefig = True)
+            else:
+                stock_share.plt()               
             print("取得単価からの騰落率：" + holding_info["profit_or_loss_ratio"] + "%")
             print("※+10%または-3%で売り\n")
 
 if __name__ == "__main__":
+    
     scraping_toredabi = ScrapingFromToredabi()
-    scraping_toredabi.input_password()
+    scraping_toredabi.enter_password()
     scraping_toredabi.login()
     scraping_toredabi.get_holdings_info()
     scraping_toredabi.plt()
