@@ -33,14 +33,15 @@ class ScrapingFromToredabi:
         values_label = ["quantity", "acquisition_price", "present_value",\
                         "profit_or_loss", "order", "change", "profit_or_loss_ratio"]        
         for stock_data in stock_datas:
+            
             holdings_info = {}
-            holdings_info["code"], holdings_info["name"] = \
-                stock_data.find(href = re.compile("/td/quotes/")).string.split(" ")
+            name_and_code = stock_data.find(href = re.compile("/td/quotes/")).string
+            holdings_info["code"], holdings_info["name"] = name_and_code.split(" ", 1)
             values = stock_data.find_all(attrs = {"class": "tblFont"})
             for i, value in enumerate(values):
                 holdings_info[values_label[i]] = value.string
             self.holdings_info.append(holdings_info)
-    
+            
     def plt(self):
         today = datetime.date.today()
         script_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)))
@@ -60,7 +61,7 @@ class ScrapingFromToredabi:
             else:
                 stock_share.plt()               
             print("取得単価からの騰落率：" + holding_info["profit_or_loss_ratio"] + "%")
-            print("※+10%または-3%で売り\n")
+            print("※+10%または-2%で売り\n")
 
 if __name__ == "__main__":
     

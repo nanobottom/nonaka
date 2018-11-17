@@ -30,34 +30,42 @@ class StockShare:
         close     = [data.close  for data in target]
         high      = [data.high   for data in target]
         low       = [data.low    for data in target]
+        volume       = [data.volume    for data in target]
         # 日付が古い順に並べ替える
         self.ohcl["date"]  = date[::-1]
         self.ohcl["open"]  = open[::-1]
         self.ohcl["close"] = close[::-1]
         self.ohcl["high"]  = high[::-1]
         self.ohcl["low"]   = low[::-1]
-        # 当日の株価データを取得する
-        # 日本経済新聞のページから現在値（当日の終値）　を取得する
-        response = requests.get("https://www.nikkei.com/nkd/company/?scode=" + str(code))
-        soup = BeautifulSoup(response.content, 'html.parser')
-        tags = soup.find(attrs = {"class": "m-stockPriceElm_value now"})
-    
-        for i, stock_price_tag in enumerate(tags):
-            # 2番目の文字は「円」のため、無視する
-            if i == 0:
-                current_price = float(stock_price_tag.string.replace(",", ""))
+        self.ohcl["volume"]   = volume[::-1]
         
-        # 当日の日足の更新時間が不明なため、前日の値と比較して動作を変える
-        target = q.get_price(code)
-        if self.ohcl["high"][-1] == target.high and self.ohcl["low"][-1] == target.low and self.ohcl["open"][-1] == target.open:
-            self.ohcl["close"][-1] = current_price
+        if datetime.date.today().strftime("%Y-%m-%d") == end_date:
+            # 当日の株価データを取得する
+            # 日本経済新聞のページから現在値（当日の終値）　を取得する
+            response = requests.get("https://www.nikkei.com/nkd/company/?scode=" + str(code))
+            soup = BeautifulSoup(response.content, 'html.parser')
+            tags = soup.find(attrs = {"class": "m-stockPriceElm_value now"})
+            target = q.get_price(code)
+            if tags != None:  
+                for i, stock_price_tag in enumerate(tags):
+                    # 2番目の文字は「円」のため、無視する
+                    if i == 0:
+                        current_price = float(stock_price_tag.string.replace(",", ""))
+            else:
+                current_price = target.close
+        
+            # 当日の日足の更新時間が不明なため、前日の値と比較して動作を変える
+        
+            if self.ohcl["high"][-1] == target.high and self.ohcl["low"][-1] == target.low and self.ohcl["open"][-1] == target.open:
+                self.ohcl["close"][-1] = current_price
             
-        else:
-            self.ohcl["date"].append(target.date)
-            self.ohcl["open"].append(target.open)
-            self.ohcl["high"].append(target.high)
-            self.ohcl["low"].append(target.low)
-            self.ohcl["close"].append(current_price)
+            else:
+                self.ohcl["date"].append(target.date)
+                self.ohcl["open"].append(target.open)
+                self.ohcl["high"].append(target.high)
+                self.ohcl["low"].append(target.low)
+                self.ohcl["volume"].append(target.volume)
+                self.ohcl["close"].append(current_price)
         
         self.span1 = None
         self.span2 = None
@@ -83,7 +91,7 @@ class StockShare:
             
     def plt(self, is_savefig = False):
         # 動作が重くならないようにクリアする
-        #plt.clf()
+        plt.clf()
         fig = plt.figure(figsize = (10, 7.5))
         ax = fig.add_subplot(111)
         ax.set_title('code:' + str(self.code), loc = 'center', fontsize = 20)
@@ -92,6 +100,10 @@ class StockShare:
         ax.autoscale_view()
         ax.patch.set_facecolor('black')# 背景色
         ax.patch.set_alpha(0.6)# 透明度
+        # ローソク足を上側75%に収める
+        #bottom, top = ax.get_ylim()
+        #ax.set_ylim(bottom - (top - bottom) / 4, top)
+        
         finance.candlestick2_ochl(ax, opens  = self.ohcl["open"], 
                                       highs  = self.ohcl["high"],
                                       lows   = self.ohcl["low"], 
@@ -101,21 +113,27 @@ class StockShare:
         # ボリンジャーバンドを計算する
         series = pd.Series(self.ohcl["close"])
         base = series.rolling(window = self.sma_date).mean()
-        base.plot(ax = ax, color = "yellow")
+        base.plot(ax = ax, color = "y",alpha = 0.75)
         #plt.plot(base, color="#1e8eff")
         sigma = series.rolling(window = self.sma_date).std(ddof = 0)
         upper_sigma  = base + sigma
-        upper_sigma.plot(ax = ax, ls = "--", color = "yellow")
+        upper_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
         upper2_sigma = base + sigma * 2
-        upper2_sigma.plot(ax = ax, ls = "--", color = "yellow")
+        upper2_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
         upper3_sigma = base + sigma * 3
-        upper3_sigma.plot(ax = ax, ls = "--", color = "yellow")
+        upper3_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
         lower_sigma  = base - sigma
-        lower_sigma.plot(ax = ax, ls = "--", color = "yellow")
+        lower_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
         lower2_sigma = base - sigma * 2
-        lower2_sigma.plot(ax = ax, ls = "--", color = "yellow")
+        lower2_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
         lower3_sigma = base - sigma * 3
-        lower3_sigma.plot(ax = ax, ls = "--", color = "yellow")
+        lower3_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
+        
+        # 上昇時のサポートラインとして13日ボリンジャーバンド1シグマを表示する
+        base13 = series.rolling(window = 13).mean()
+        sigma13 = series.rolling(window = 13).std(ddof = 0)
+        upper13_sigma  = base13 + sigma13
+        upper13_sigma.plot(ax = ax, ls = "--",  color = "w")
         
         # エンベロープを計算する
         base2 = series.rolling(window = 45).mean()
@@ -132,11 +150,29 @@ class StockShare:
         # 一目均衡雲を表示する
         self.calc_cloud()
         x_data = [x for x in range(26, 26+len(self.span1))]
-        plt.plot(x_data, self.span1, color = "red")
-        plt.plot(x_data, self.span2, color = "blue")
+        plt.plot(x_data, self.span1, color = "red",alpha = 0.5)
+        plt.plot(x_data, self.span2, color = "blue",alpha = 0.5)
         plt.fill_between(x_data, self.span1, self.span2, where=self.span1>self.span2, facecolor='red',alpha = 0.25)
         plt.fill_between(x_data, self.span1, self.span2, where=self.span1<self.span2, facecolor='blue', alpha = 0.25)
         
+        # GMMAを表示する
+        series = pd.Series(self.ohcl["close"])
+        short_windows = [3,5,8,10,12,15]
+        for window in short_windows:
+            base = series.rolling(window = window).mean()
+            base.plot(ax = ax, color = "c", alpha = 0.5)
+            
+        long_windows = [30,35,40,45,50,60]
+        for window in long_windows:
+            base = series.rolling(window = window).mean()
+            base.plot(ax = ax, color = "m", alpha = 0.5)
+        
+        # 出来高を表示する
+        ax2 = ax.twinx()
+        ax2.set_ylim([0, max(self.ohcl["volume"]) * 4])
+        ax2.set_ylabel("volume")
+        finance.volume_overlay(ax2, self.ohcl["open"], self.ohcl["close"], self.ohcl["volume"], colorup='r', colordown='g', width=0.5, alpha=0.5)
+        #ax2.set_ylim([0, self.ohcl["volume"].max() * 0.5])
         
         plt.xlim([80, 138])
         plt.grid(True, linestyle='--', color='0.75')
@@ -156,13 +192,15 @@ class StockShare:
         # ルール４「28日間の終値最良日で買う」
         x = self.ohcl["close"][-28:]
         max_index = x.index(max(x))
-        if max_index + 1 == 28:
+        if (max_index + 1) in range(26,29):
             return True
         else:
             return False
      
     def is_over_cloud(self):
         self.calc_cloud()
+        if self.ohcl["close"].index(self.ohcl["close"][-1]) < 26 or self.ohcl["close"].index(self.ohcl["close"][-1]) < 26:
+            return True
         current_span1 = self.span1[self.ohcl["close"].index(self.ohcl["close"][-1]) -26]
         current_span2 = self.span2[self.ohcl["close"].index(self.ohcl["close"][-1]) -26]
         if self.ohcl["close"][-1] > current_span1 and self.ohcl["close"][-1] > current_span2:
@@ -172,7 +210,7 @@ class StockShare:
 
 if __name__ == "__main__":
     today = datetime.date.today()
-    stock_share = StockShare(9729, end_date = today.strftime("%Y-%m-%d"))
+    stock_share = StockShare(7647, end_date = today.strftime("%Y-%m-%d"))
     stock_share.plt()
     ratio = stock_share.calc_change_in_price()
     print(ratio)
