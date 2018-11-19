@@ -139,6 +139,7 @@ if __name__ == "__main__":
     code = 3849
     # 株価（終値）を取得する 
     stock_share = StockShare(code, end_date = today.strftime("%Y-%m-%d"), term = 300)
+    stock_share.get_stock_data()
     ml = MachineLearning(stock_share.ohcl["close"])
     #LSTMは入力値を0~1に正規化しておくと安定した出力が得られる
     ml.normalization_zero_one()

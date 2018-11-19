@@ -49,6 +49,7 @@ class ScrapingFromToredabi:
         failure_dir = os.path.join(script_dir, "toredabi", "failure")
         for holding_info in self.holdings_info:
             stock_share = StockShare(holding_info["code"], today.strftime("%Y-%m-%d"))
+            stock_share.get_stock_data()
             print(holding_info["name"])
             # 画像を保存するディレクトリに移動する
 

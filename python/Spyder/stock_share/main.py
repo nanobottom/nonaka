@@ -22,6 +22,7 @@ today = datetime.date.today()
 for code, name in zip(codes, names):
     print(".", end = "")
     stock_share = StockShare(code, today.strftime("%Y-%m-%d"))
+    stock_share.get_stock_data()
     if stock_share.is_high_value_for28days() == True and stock_share.is_over_cloud() == True:
         print("\n" + name)
         stock_share.plt()

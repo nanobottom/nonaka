@@ -10,86 +10,144 @@ class StockShare:
     # ルール２「ボリンジャーサイクルの初期で買う」
     # ルール３「ボラティリティの低いものは買わない」
     # ルール４「28日間の終値最良日で買う」
-    # end=time:yyyy-mm-dd形式で記述する
+    # end_date : yyyy-mm-dd形式で記述する
     def __init__(self, code, end_date = None, term = 200):
         self.code = code
         self.end_date = end_date        
-        # 移動平均線（SMA）で平均する日付パラメータ
-        self.sma_date = 25
-        year, month, day = end_date.split('-')
-        self.end = datetime.date(int(year),int(month), 
-                                 int(day))
+        _year, _month, _day = end_date.split('-')
+        _year, _month, _day = int(_year), int(_month), int(_day)
+        self.end = datetime.date(_year, _month, _day)
         self.start = self.end - datetime.timedelta(days = term)
-        # 過去の株価データを取得する
-        q = jsm.Quotes()
-        target = q.get_historical_prices(code, jsm.DAILY, self.start, self.end)
-        
         self.ohcl = {}
-        date      = [data.date   for data in target]
-        open      = [data.open   for data in target]
-        close     = [data.close  for data in target]
-        high      = [data.high   for data in target]
-        low       = [data.low    for data in target]
-        volume       = [data.volume    for data in target]
-        # 日付が古い順に並べ替える
-        self.ohcl["date"]  = date[::-1]
-        self.ohcl["open"]  = open[::-1]
-        self.ohcl["close"] = close[::-1]
-        self.ohcl["high"]  = high[::-1]
-        self.ohcl["low"]   = low[::-1]
-        self.ohcl["volume"]   = volume[::-1]
+        # ボリンジャーバンドに用いる移動平均線（SMA）の窓
+        self.bolinger_window = 25
+        self._span1 = None
+        self._span2 = None
+    
+    def get_stock_data(self):
+        # 株価データを取得する
+        _quotes = jsm.Quotes()
+        _target = _quotes.get_historical_prices(self.code, jsm.DAILY, self.start, self.end)
         
-        if datetime.date.today().strftime("%Y-%m-%d") == end_date:
-            # 当日の株価データを取得する
+        # 株価情報をリスト形式に変換する
+        _date    = [_data.date.strftime("%Y-%m-%d")   for _data in _target]
+        _open    = [_data.open                        for _data in _target]
+        _close   = [_data.close                       for _data in _target]
+        _high    = [_data.high                        for _data in _target]
+        _low     = [_data.low                         for _data in _target]
+        _volume  = [_data.volume                      for _data in _target]
+        
+        # 日付が古い順に並べ替える
+        self.ohcl["date"]     = _date[::-1]
+        self.ohcl["open"]     = _open[::-1]
+        self.ohcl["close"]    = _close[::-1]
+        self.ohcl["high"]     = _high[::-1]
+        self.ohcl["low"]      = _low[::-1]
+        self.ohcl["volume"]   = _volume[::-1]
+        
+        # 過去のデータではなく、最新の日付をend_dateに指定した場合の処理を以下に示す
+        if  self.end_date == datetime.date.today().strftime("%Y-%m-%d"):
             # 日本経済新聞のページから現在値（当日の終値）　を取得する
-            response = requests.get("https://www.nikkei.com/nkd/company/?scode=" + str(code))
-            soup = BeautifulSoup(response.content, 'html.parser')
-            tags = soup.find(attrs = {"class": "m-stockPriceElm_value now"})
-            target = q.get_price(code)
-            if tags != None:  
-                for i, stock_price_tag in enumerate(tags):
+            # ※get_priceメソッドで取得したデータの終値が前日の終値のままになっていたため
+            _res = requests.get("https://www.nikkei.com/nkd/company/?scode=" + str(self.code))
+            _soup = BeautifulSoup(_res.content, 'html.parser')
+            _tags = _soup.find(attrs = {"class": "m-stockPriceElm_value now"})
+            _target = _quotes.get_price(self.code)
+            
+            if _tags != None:  
+                for i, _stock_price_tag in enumerate(_tags):
                     # 2番目の文字は「円」のため、無視する
                     if i == 0:
-                        current_price = float(stock_price_tag.string.replace(",", ""))
+                        current_price = float(_stock_price_tag.string.replace(",", ""))
             else:
-                current_price = target.close
-        
+                # 日経新聞のページから現在の終値を取得できなかった場合はやむを得ずget_priceメソッドの値を採用する
+                current_price = _target.close
+            
             # 当日の日足の更新時間が不明なため、前日の値と比較して動作を変える
-        
-            if self.ohcl["high"][-1] == target.high and self.ohcl["low"][-1] == target.low and self.ohcl["open"][-1] == target.open:
+            # 書き方が汚いため、改善する必要あり
+            if self.ohcl["high"][-1] == _target.high and self.ohcl["low"][-1] == _target.low and self.ohcl["open"][-1] == _target.open:
                 self.ohcl["close"][-1] = current_price
             
             else:
-                self.ohcl["date"].append(target.date)
-                self.ohcl["open"].append(target.open)
-                self.ohcl["high"].append(target.high)
-                self.ohcl["low"].append(target.low)
-                self.ohcl["volume"].append(target.volume)
+                self.ohcl["date"].append(_target.date)
+                self.ohcl["open"].append(_target.open)
+                self.ohcl["high"].append(_target.high)
+                self.ohcl["low"].append(_target.low)
+                self.ohcl["volume"].append(_target.volume)
                 self.ohcl["close"].append(current_price)
-        
-        self.span1 = None
-        self.span2 = None
-    
-    def calc_cloud(self):
-        # 一目均衡雲を計算する
-        # 転換線
-        high_series = pd.Series(self.ohcl["high"])
-        low_series = pd.Series(self.ohcl["low"])
-        high9 = high_series.rolling(window = 9,center=False).max()
-        low9 = low_series.rolling(window = 9,center=False).min()
-        change_line = ( high9 + low9 ) / 2
-        # 基準線
-        high26 = high_series.rolling(window = 26,center=False).max()
-        low26 =  low_series.rolling(window = 26,center=False).min()
-        standart_line = ( high26 + low26 ) / 2
-        # 先行スパン1
-        self.span1 = (change_line + standart_line) / 2
-        # 先行スパン2
-        high52 = high_series.rolling(window = 52,center=False).max()
-        low52 =  low_series.rolling(window = 52,center=False).min()
-        self.span2 = ( high52 + low52 ) / 2
+                
+    def __plt_bolinger_band(self, ax):
+        _series = pd.Series(self.ohcl["close"])
+        # 移動平均線
+        base = _series.rolling(window = self.bolinger_window).mean()
+        base.plot(ax = ax, color = "y", alpha = 0.75)
+        # シグマ
+        _sigma = _series.rolling(window = self.bolinger_window).std(ddof = 0)
+        _SIGMA_RATES = [1, 2, 3, -1, -2, -3]
+        for _rate in _SIGMA_RATES:
+            sigma_line  = base + _sigma * _rate
+            sigma_line.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
             
-    def plt(self, is_savefig = False):
+    def __plt_envelope(self, ax):
+        _series = pd.Series(self.ohcl["close"])
+        base = _series.rolling(window = 45).mean()
+        base.plot(ax = ax, ls = "--", color = 'k')
+        _ENVELOPE_RATES = [1.11,1.12,0.89,0.88]
+        for _rate in _ENVELOPE_RATES:
+            env = base * _rate
+            env.plot(ax = ax, color = 'k')
+    
+    def __plt_upper_support_line(self, ax):
+        # 上昇時のサポートラインとして13日ボリンジャーバンド1シグマを表示する
+        _series = pd.Series(self.ohcl["close"])
+        _base13 = _series.rolling(window = 13).mean()
+        _sigma13 = _series.rolling(window = 13).std(ddof = 0)
+        upper13_sigma  = _base13 + _sigma13
+        upper13_sigma.plot(ax = ax, ls = "--",  color = "w")
+        
+    def __plt_GMMA(self, ax):
+        # GMMAを表示する
+        _series = pd.Series(self.ohcl["close"])
+        _SHORT_WINDOWS = [3,5,8,10,12,15]
+        for window in _SHORT_WINDOWS:
+            base = _series.rolling(window = window).mean()
+            base.plot(ax = ax, color = "c", alpha = 0.5)            
+        _LONG_WINDOWS = [30,35,40,45,50,60]
+        for window in _LONG_WINDOWS:
+            base = _series.rolling(window = window).mean()
+            base.plot(ax = ax, color = "m", alpha = 0.5)
+            
+    def __plt_volume(self, ax):
+        # 出来高を表示する
+        ax2 = ax.twinx()
+        ax2.set_ylim([0, max(self.ohcl["volume"])*4])
+        ax2.set_ylabel("volume")
+        finance.volume_overlay(ax2, self.ohcl["open"], 
+                               self.ohcl["close"],
+                               self.ohcl["volume"],
+                               colorup='r', colordown='g',
+                               width=0.5, alpha=0.5)
+        
+    def __calc_leading_span(self):
+        """一目均衡雲に用いる先行スパンを計算する"""
+        # 転換線
+        _high_series = pd.Series(self.ohcl["high"])
+        _low_series = pd.Series(self.ohcl["low"])
+        _high9 = _high_series.rolling(window = 9,center=False).max()
+        _low9  = _low_series.rolling(window = 9,center=False).min()
+        _change_line = (_high9 + _low9)/2
+        # 基準線
+        _high26 = _high_series.rolling(window = 26,center=False).max()
+        _low26  = _low_series.rolling(window = 26,center=False).min()
+        _standart_line = (_high26 + _low26)/2
+        # 先行スパン1
+        self._span1 = (_change_line + _standart_line) / 2
+        # 先行スパン2
+        _high52 = _high_series.rolling(window = 52,center=False).max()
+        _low52  = _low_series.rolling(window = 52,center=False).min()
+        self._span2 = (_high52 + _low52)/2
+            
+    def plt(self, savefig = False):
         # 動作が重くならないようにクリアする
         plt.clf()
         fig = plt.figure(figsize = (10, 7.5))
@@ -100,93 +158,40 @@ class StockShare:
         ax.autoscale_view()
         ax.patch.set_facecolor('black')# 背景色
         ax.patch.set_alpha(0.6)# 透明度
-        # ローソク足を上側75%に収める
-        #bottom, top = ax.get_ylim()
-        #ax.set_ylim(bottom - (top - bottom) / 4, top)
-        
+ 
         finance.candlestick2_ochl(ax, opens  = self.ohcl["open"], 
                                       highs  = self.ohcl["high"],
                                       lows   = self.ohcl["low"], 
                                       closes = self.ohcl["close"], 
                                       width = 0.5, colorup = 'r', 
-                                      colordown = 'g', alpha = 0.75)
-        # ボリンジャーバンドを計算する
-        series = pd.Series(self.ohcl["close"])
-        base = series.rolling(window = self.sma_date).mean()
-        base.plot(ax = ax, color = "y",alpha = 0.75)
-        #plt.plot(base, color="#1e8eff")
-        sigma = series.rolling(window = self.sma_date).std(ddof = 0)
-        upper_sigma  = base + sigma
-        upper_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
-        upper2_sigma = base + sigma * 2
-        upper2_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
-        upper3_sigma = base + sigma * 3
-        upper3_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
-        lower_sigma  = base - sigma
-        lower_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
-        lower2_sigma = base - sigma * 2
-        lower2_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
-        lower3_sigma = base - sigma * 3
-        lower3_sigma.plot(ax = ax, ls = "--", color = "y",alpha = 0.75)
-        
-        # 上昇時のサポートラインとして13日ボリンジャーバンド1シグマを表示する
-        base13 = series.rolling(window = 13).mean()
-        sigma13 = series.rolling(window = 13).std(ddof = 0)
-        upper13_sigma  = base13 + sigma13
-        upper13_sigma.plot(ax = ax, ls = "--",  color = "w")
-        
-        # エンベロープを計算する
-        base2 = series.rolling(window = 45).mean()
-        base2.plot(ls = "--", color = 'k')
-        upper_env = base2 * (1 + 0.12)
-        upper_env.plot(color = 'k')
-        upper_env2 = base2 * (1 + 0.11)
-        upper_env2.plot(color = 'k')
-        lower_env = base2 * (1 - 0.12)
-        lower_env.plot(color = 'k')
-        lower_env2 = base2 * (1 - 0.11)
-        lower_env2.plot(color = 'k')
-        
-        # 一目均衡雲を表示する
-        self.calc_cloud()
-        x_data = [x for x in range(26, 26+len(self.span1))]
-        plt.plot(x_data, self.span1, color = "red",alpha = 0.5)
-        plt.plot(x_data, self.span2, color = "blue",alpha = 0.5)
-        plt.fill_between(x_data, self.span1, self.span2, where=self.span1>self.span2, facecolor='red',alpha = 0.25)
-        plt.fill_between(x_data, self.span1, self.span2, where=self.span1<self.span2, facecolor='blue', alpha = 0.25)
-        
-        # GMMAを表示する
-        series = pd.Series(self.ohcl["close"])
-        short_windows = [3,5,8,10,12,15]
-        for window in short_windows:
-            base = series.rolling(window = window).mean()
-            base.plot(ax = ax, color = "c", alpha = 0.5)
+                                      colordown = 'g', alpha = 0.75) 
+        self.__plt_bolinger_band(ax)
+        self.__plt_envelope(ax)
+        self.__plt_upper_support_line(ax)
+        self.__plt_GMMA(ax)
+        self.__plt_volume(ax)
             
-        long_windows = [30,35,40,45,50,60]
-        for window in long_windows:
-            base = series.rolling(window = window).mean()
-            base.plot(ax = ax, color = "m", alpha = 0.5)
-        
-        # 出来高を表示する
-        ax2 = ax.twinx()
-        ax2.set_ylim([0, max(self.ohcl["volume"]) * 4])
-        ax2.set_ylabel("volume")
-        finance.volume_overlay(ax2, self.ohcl["open"], self.ohcl["close"], self.ohcl["volume"], colorup='r', colordown='g', width=0.5, alpha=0.5)
-        #ax2.set_ylim([0, self.ohcl["volume"].max() * 0.5])
+        # 一目均衡雲をプロットする
+        self.__calc_leading_span()
+        x_data = [x for x in range(26, 26 + len(self._span1))]
+        plt.plot(x_data, self._span1, color = "red",alpha = 0.5)
+        plt.plot(x_data, self._span2, color = "blue",alpha = 0.5)
+        plt.fill_between(x_data, self._span1, self._span2, where=self._span1>self._span2, facecolor='red',alpha = 0.25)
+        plt.fill_between(x_data, self._span1, self._span2, where=self._span1<self._span2, facecolor='blue', alpha = 0.25)
         
         plt.xlim([80, 138])
         plt.grid(True, linestyle='--', color='0.75')
               
         # 画像を保存する
-        if is_savefig == True:
-            #date = self.end_date.replace("-", "")
-            #fig_name = date + "_" + self.code + ".png"
+        if savefig == True:
             fig_name = str(self.code) + ".png"
             plt.savefig(fig_name)
+            
         plt.show()
+        
     def calc_change_in_price(self):
         # 騰落率を計算する
-        return (self.ohcl["close"][-1] - self.ohcl["close"][-2]) / self.ohcl["close"][-2] * 100
+        return (self.ohcl["close"][-1] - self.ohcl["close"][-2])/self.ohcl["close"][-2]*100
     
     def is_high_value_for28days(self):
         # ルール４「28日間の終値最良日で買う」
@@ -198,11 +203,11 @@ class StockShare:
             return False
      
     def is_over_cloud(self):
-        self.calc_cloud()
+        self.__calc_leading_span()
         if self.ohcl["close"].index(self.ohcl["close"][-1]) < 26 or self.ohcl["close"].index(self.ohcl["close"][-1]) < 26:
             return True
-        current_span1 = self.span1[self.ohcl["close"].index(self.ohcl["close"][-1]) -26]
-        current_span2 = self.span2[self.ohcl["close"].index(self.ohcl["close"][-1]) -26]
+        current_span1 = self._span1[self.ohcl["close"].index(self.ohcl["close"][-1]) -26]
+        current_span2 = self._span2[self.ohcl["close"].index(self.ohcl["close"][-1]) -26]
         if self.ohcl["close"][-1] > current_span1 and self.ohcl["close"][-1] > current_span2:
             return True
         else:
@@ -210,7 +215,8 @@ class StockShare:
 
 if __name__ == "__main__":
     today = datetime.date.today()
-    stock_share = StockShare(7647, end_date = today.strftime("%Y-%m-%d"))
+    stock_share = StockShare(2489, end_date = today.strftime("%Y-%m-%d"))
+    stock_share.get_stock_data()
     stock_share.plt()
     ratio = stock_share.calc_change_in_price()
     print(ratio)
