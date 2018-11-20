@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
-import requests
-from bs4 import BeautifulSoup
-response = requests.get("https://www.nikkei.com/nkd/company/?scode=9707")
-soup = BeautifulSoup(response.content, 'html.parser')
-print(soup)
-current_price_tag = soup.find(attrs = {"class": "m-stockPriceElm_value now"})
-print(current_price_tag)
-for i, current_price in enumerate(current_price_tag):
-    if i == 0:
-        print(current_price.string)
+"""
+Created on Tue Nov 20 07:26:16 2018
+
+@author: 亮
+"""
+import time, datetime
+
+def execute_timer():
+    _stop = True
+    while(_stop):
+        print(datetime.datetime.now().strftime("%H:%M"))
+        time.sleep(1)
+        
+        if datetime.datetime.now().strftime("%H:%M") == "08:04":
+            _stop = False
+            
+execute_timer()
