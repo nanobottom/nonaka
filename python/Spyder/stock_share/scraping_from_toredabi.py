@@ -43,7 +43,7 @@ class ScrapingFromToredabi:
                         "profit_or_loss", "order", "change", "profit_or_loss_ratio"]        
         for stock_data in stock_datas:           
             holdings_info = {}
-            name_and_code = stock_data.find(href = re.compile("/td/quotes/")).string
+            name_and_code = stock_data.find(href=re.compile("/td/quotes/")).string
             holdings_info["code"], holdings_info["name"] = name_and_code.split(" ", 1)
             values = stock_data.find_all(attrs={"class": "tblFont"})
             for i, value in enumerate(values):

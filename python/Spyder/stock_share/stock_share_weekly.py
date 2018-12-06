@@ -14,7 +14,7 @@ import matplotlib.finance as finance
 import pandas as pd
 from bs4 import BeautifulSoup
 
-class StockShare:
+class StockShareWeekly:
     """
     株価を取得し、インジケータを使用したローソク足の表示ができる。
     
@@ -24,7 +24,7 @@ class StockShare:
     ルール４「28日間の終値最良日で買う」
     end_date : yyyy-mm-dd形式で記述する
     """
-    def __init__(self, code, end_date = None, term = 200):
+    def __init__(self, code, end_date = None, term = 800):
         self.code = code
         self.end_date = end_date        
         _year, _month, _day = end_date.split('-')
@@ -43,7 +43,7 @@ class StockShare:
         """株価データ（始値、高値、安値、終値、出来高、日付）を取得する"""
         _quotes = jsm.Quotes()
         try:
-            _target = _quotes.get_historical_prices(self.code, jsm.DAILY, self.start, self.end)
+            _target = _quotes.get_historical_prices(self.code, jsm.WEEKLY, self.start, self.end)
         except:
             print("存在しないコードです。")
             self.is_exist_code = False
@@ -104,7 +104,7 @@ class StockShare:
         self.__plt_GMMA(ax)
         self.__plt_volume(ax)
         
-        plt.xlim([80, 140])
+        plt.xlim([100, 120])
         plt.grid(True, linestyle='--', color='0.75')
               
         # 画像を保存する
@@ -249,9 +249,9 @@ class StockShare:
         self._span2 = (_high52+_low52)/2
             
 if __name__ == "__main__":
-    #today = datetime.date.today()
-    #stock_share = StockShare(2489, end_date = today.strftime("%Y-%m-%d"))
-    stock_share = StockShare(9501, end_date = "2017-01-06")
+    today = datetime.date.today()
+    stock_share = StockShareWeekly(2489, end_date = today.strftime("%Y-%m-%d"))
+    #stock_share = StockShare(9501, end_date = "2017-01-06")
     stock_share.get_candle_data()
     stock_share.plt()
     ratio = stock_share.calc_change_in_price()
