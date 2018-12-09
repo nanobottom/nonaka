@@ -8,7 +8,8 @@ conf_path = os.path.join(current_dir, 'config.ini')
 conf = configparser.ConfigParser()
 conf.read(conf_path, 'UTF-8')
 def main():
-    URL = 'http://' + conf.get('settings', 'host') + ':' + conf.get('settings', 'port') + '/post'
+    #URL = 'http://' + conf.get('settings', 'host') + ':' + conf.get('settings', 'port') + '/post'
+    URL = 'http://' + conf.get('settings', 'host') + '/post'
     request_data = ClientRequestData()
     response = requests.post(URL,request_data.set_data() )
 
