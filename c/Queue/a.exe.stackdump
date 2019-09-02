@@ -1,9 +1,0 @@
-Exception: STATUS_ACCESS_VIOLATION at eip=6115858F
-eax=0062C9CF ebx=00000001 ecx=00000001 edx=00000001 esi=0062C9CF edi=00000000
-ebp=0062C7A8 esp=0062C79C program=C:\cygwin\home\ryo\C\test\Queue\a.exe, pid 68380, thread main
-cs=0023 ds=002B es=002B fs=0053 gs=002B ss=002B
-Stack trace:
-Frame     Function  Args
-0062C7A8  6115858F (00000000, 0062C9CF, 00000001, 611D1D60)
-0062C934  61168940 (00000001, 00000001, 0062C9D8, 7405825A)
-End of stack trace

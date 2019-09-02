@@ -1,0 +1,6 @@
+Exception: STATUS_ACCESS_VIOLATION at eip=61161EA5
+eax=0062C934 ebx=80808080 ecx=00000001 edx=0062C934 esi=000000FF edi=0062C934
+ebp=00000100 esp=0062C80C program=C:\cygwin\home\ryo\C\C_laboratory\decToBin\a.exe, pid 14552, thread main
+cs=0023 ds=002B es=002B fs=0053 gs=002B ss=002B
+Stack trace:
+Frame     Function  Args

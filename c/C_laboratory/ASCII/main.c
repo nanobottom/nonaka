@@ -3,8 +3,6 @@
 #include <string.h>
 #include <ctype.h>
 
-int is_shift_jis(unsigned char code);
-
 int main(void)
 {
   unsigned char code = 0x00;
@@ -26,17 +24,3 @@ int main(void)
     }
   }
 }
-
-int is_shift_jis(unsigned char code)
-{
-  if((code >= 0x20 && 0x7E <= code) ||
-    (code >= 0xA1 && 0xDF <= code))
-  {
-    return 1;
-  }
-  else
-  {
-    return 0;
-  }
-}
-
