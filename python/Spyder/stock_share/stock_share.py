@@ -6,13 +6,14 @@ __author__  = 'ryo'
 __version__ = '1.0'
 __date__    = '2018/11/20'
 
-import jsm
 import datetime
 import requests
 import matplotlib.pyplot as plt
-import matplotlib.finance as finance
+#import matplotlib.finance as finance
+import mpl_finance as finance
 import pandas as pd
 from bs4 import BeautifulSoup
+from quotes import Quotes
 
 class StockShare:
     """
@@ -24,15 +25,15 @@ class StockShare:
     ルール４「28日間の終値最良日で買う」
     end_date : yyyy-mm-dd形式で記述する
     """
-    def __init__(self, code, end_date = None, term = 200):
+    def __init__(self, code, end_date = '2019-01-01', term = 150):
         self.code = code
         self.end_date = end_date        
-        _year, _month, _day = end_date.split('-')
-        _year, _month, _day = int(_year), int(_month), int(_day)
-        self.end = datetime.date(_year, _month, _day)
+        year, month, day = end_date.split('-')
+        year, month, day = int(year), int(month), int(day)
+        self.end = datetime.date(year, month, day)
         self.start = self.end - datetime.timedelta(days=term)
         self.ohcl = {}
-        # ボリンジャーバンドに用いる移動平均線（SMA）の窓
+        # ボリンジャーバンドに用いる移動平均線(SMA)の窓
         self.bolinger_window = 25
         self._span1 = None
         self._span2 = None
@@ -41,31 +42,32 @@ class StockShare:
     
     def get_candle_data(self):
         """株価データ（始値、高値、安値、終値、出来高、日付）を取得する"""
-        _quotes = jsm.Quotes()
+        quotes = Quotes(self.code, self.start, self.end)
         try:
-            _target = _quotes.get_historical_prices(self.code, jsm.DAILY, self.start, self.end)
+            quotes.get_stock_data()
         except:
             print("存在しないコードです。")
             self.is_exist_code = False
             return
         
         # 株価情報をリスト形式に変換する
-        _date = [_data.date.strftime("%Y-%m-%d") for _data in _target]
-        _open = [_data.open for _data in _target]
-        _close = [_data.close for _data in _target]
-        _high = [_data.high for _data in _target]
-        _low = [_data.low for _data in _target]
-        _volume = [_data.volume for _data in _target]
-        
+        """
+        date = [data.date.strftime("%Y-%m-%d") for data in target]
+        open = [data.open for data in target]
+        close = [data.close for data in target]
+        high = [data.high for data in target]
+        low = [data.low for data in target]
+        volume = [data.volume for data in target]
+        """
         # 日付が古い順に並べ替える
-        self.ohcl["date"] = _date[::-1]
-        self.ohcl["open"] = _open[::-1]
-        self.ohcl["close"] = _close[::-1]
-        self.ohcl["high"] = _high[::-1]
-        self.ohcl["low"] = _low[::-1]
-        self.ohcl["volume"] = _volume[::-1]
+        self.ohcl["date"] = quotes.date[::-1]
+        self.ohcl["open"] = quotes.open[::-1]
+        self.ohcl["close"] = quotes.close[::-1]
+        self.ohcl["high"] = quotes.high[::-1]
+        self.ohcl["low"] = quotes.low[::-1]
+        self.ohcl["volume"] = quotes.volume[::-1]
         
-        self.__get_current_candle_data()
+        #self.__get_current_candle_data()
 
     def plt(self, savefig=False):
         # 動作が重くならないようにクリアする
@@ -104,7 +106,7 @@ class StockShare:
         self.__plt_GMMA(ax)
         self.__plt_volume(ax)
         
-        plt.xlim([80, 140])
+        plt.xlim([40, 105])
         plt.grid(True, linestyle='--', color='0.75')
               
         # 画像を保存する
@@ -119,10 +121,12 @@ class StockShare:
         return (self.ohcl["close"][-1]-self.ohcl["close"][-2])/self.ohcl["close"][-2]*100
     
     def is_high_value_for28days(self):
-        """ルール４「28日間の終値最良日で買う」"""
+        """ルール４「28日間の終値最良日で買う」
+        28日間のうち直近5日で最良日があるか判定するよう基準を緩める
+        """
         x = self.ohcl["close"][-28:]
         max_index = x.index(max(x))
-        if (max_index+1) == 28:
+        if (max_index+1) in range(23, 29):
             return True
         else:
             return False
@@ -143,7 +147,7 @@ class StockShare:
             
     def __get_current_candle_data(self):
         """最新のローソク足のデータを取得する（jsmでは現在値を取得することができないため）"""
-        _quotes = jsm.Quotes()
+        _quotes = Quotes()
         # 過去のデータではなく、最新の日付をend_dateに指定した場合の処理を以下に示す
         if  self.end_date == datetime.date.today().strftime("%Y-%m-%d"):
             # 日本経済新聞のページから現在値（当日の終値）　を取得する
