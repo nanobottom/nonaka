@@ -2,7 +2,7 @@
 import python_bitbankcc, datetime
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.finance as finance
+import mpl_finance as finance
 
 class CryptoCurrencyCandle:
 
@@ -176,7 +176,7 @@ class CryptoCurrencyCandle:
     
 if __name__ == "__main__":
     #date = datetime.date.today().strftime("%Y-%m-%d")
-    date = "2018-01-15"
+    date = "2018-08-15"
     crypto_candle = CryptoCurrencyCandle("xrp_jpy",date)
     crypto_candle.get_candle_data()
     crypto_candle.plt()

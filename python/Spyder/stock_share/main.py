@@ -27,10 +27,11 @@ def execute_timer():
 
 def main():
     start_time = time.time()
+    print("☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆START!!☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆")
     #winsound.Beep(2000, 500)
     
     _codes, _names = [], []
-    for i in range(1, 5):
+    for i in range(1, 4):
     #for i in range(5, 10):
     # 東証1部銘柄で探す
         if i == 1:
@@ -50,8 +51,8 @@ def main():
             # 週足のローソク足を表示する
             #ss_weekly = StockShareWeekly(code, datetime.date.today().strftime("%Y-%m-%d"))
             #ss_weekly.get_candle_data()
-            if (stock_share.is_high_value_for28days() == True and 
-                stock_share.is_over_cloud() == True):
+            if (stock_share.is_high_value_for28days() == True):
+                #stock_share.is_over_cloud() == True):
                 #ss_weekly.is_over_cloud() == True):
                 print("\n" + name)
                 stock_share.plt() 

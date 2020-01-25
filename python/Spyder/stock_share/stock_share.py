@@ -25,7 +25,7 @@ class StockShare:
     ルール４「28日間の終値最良日で買う」
     end_date : yyyy-mm-dd形式で記述する
     """
-    def __init__(self, code, end_date = '2019-01-01', term = 150):
+    def __init__(self, code, end_date = '2019-01-01', term = 100):
         self.code = code
         self.end_date = end_date        
         year, month, day = end_date.split('-')
@@ -72,8 +72,9 @@ class StockShare:
     def plt(self, savefig=False):
         # 動作が重くならないようにクリアする
         plt.clf()
-        fig = plt.figure(figsize=(10, 7.5))
-        ax = fig.add_subplot(111)
+        #fig = plt.figure(figsize=(10, 6))
+        fig, (ax, ax2) = plt.subplots(2,1, gridspec_kw = {'height_ratios':[3, 1]}, figsize=(10, 6))
+        #ax = fig.add_subplot(111)
         ax.set_title('code:' + str(self.code), loc='center', fontsize=20)
         ax.set_xlabel('day')
         ax.set_ylabel('price')
@@ -89,6 +90,7 @@ class StockShare:
                                       colordown='g', alpha=0.75) 
                  
         # 一目均衡雲をプロットする
+        """
         self.__calc_leading_span()
         x_data = [x for x in range(26, 26 + len(self._span1))]
         plt.plot(x_data, self._span1, color="r",alpha=0.5)
@@ -99,14 +101,17 @@ class StockShare:
         plt.fill_between(x_data, self._span1, self._span2,
                          where=self._span1<self._span2, 
                          facecolor='b', alpha=0.25)
-        
+        """
         self.__plt_bolinger_band(ax)
         self.__plt_envelope(ax)
         self.__plt_upper_support_line(ax)
         self.__plt_GMMA(ax)
         self.__plt_volume(ax)
+        #self.__plt_RSI(ax2)
+        self.__plt_MACD(ax2)
         
-        plt.xlim([40, 105])
+        #plt.xlim([0, 105])
+        
         plt.grid(True, linestyle='--', color='0.75')
               
         # 画像を保存する
@@ -114,6 +119,7 @@ class StockShare:
             fig_name = str(self.code) + ".png"
             plt.savefig(fig_name)
             
+        fig.tight_layout()
         plt.show()
         
     def calc_change_in_price(self):
@@ -233,6 +239,39 @@ class StockShare:
                                colorup='r', colordown='g',
                                width=0.5, alpha=0.5)
         
+    def __plt_RSI(self, ax):
+        data = pd.Series(self.ohcl["close"])
+        ##差分を計算する
+        diff = data.diff()
+
+        #最初の数値がNanで欠損してしまうので削除する
+        diff_data = diff[1:]
+
+        ## 値上がり幅、値下がり幅をシリーズへ切り分け
+        up, down = diff_data.copy(), diff_data.copy()
+        up[up < 0] = 0
+        down[down > 0] = 0
+
+        # 値上がり幅/値下がり幅の単純移動平均（14)を処理
+        up_sma_14 = up.rolling(window=14, center=False).mean()
+        down_sma_14 = down.abs().rolling(window=14, center=False).mean()
+
+        # RSIの計算
+        RS = up_sma_14 / down_sma_14
+        RSI = 100.0 - (100.0 / (1.0 + RS))
+        RSI.plot(ax=ax, color="c", alpha=0.5)
+        ax.set(ylim = (0,100))
+        ax.grid(True)
+        
+    def __plt_MACD(self, ax):
+        ewm_short = pd.Series(self.ohcl["close"]).ewm(span=12).mean()
+        ewm_long = pd.Series(self.ohcl["close"]).ewm(span=24).mean()
+        macd = ewm_short - ewm_long
+        signal = macd.rolling(9).mean()
+        macd.plot(ax=ax, color="g", alpha=0.5)
+        signal.plot(ax=ax, color="r", alpha=0.5)
+        
+        
     def __calc_leading_span(self):
         """一目均衡雲に用いる先行スパンを計算する"""
         # 転換線
@@ -253,9 +292,9 @@ class StockShare:
         self._span2 = (_high52+_low52)/2
             
 if __name__ == "__main__":
-    #today = datetime.date.today()
-    #stock_share = StockShare(2489, end_date = today.strftime("%Y-%m-%d"))
-    stock_share = StockShare(9501, end_date = "2017-01-06")
+    today = datetime.date.today()
+    stock_share = StockShare(9501, end_date = today.strftime("%Y-%m-%d"))
+    #stock_share = StockShare(9501, end_date = "2017-01-06")
     stock_share.get_candle_data()
     stock_share.plt()
     ratio = stock_share.calc_change_in_price()
