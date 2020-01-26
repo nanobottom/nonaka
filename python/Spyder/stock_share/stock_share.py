@@ -270,6 +270,9 @@ class StockShare:
         signal = macd.rolling(9).mean()
         macd.plot(ax=ax, color="g", alpha=0.5)
         signal.plot(ax=ax, color="r", alpha=0.5)
+        ax.hlines([0], 0, 65, "blue", linestyles='dashed')
+        #ax.hlines([50], 0, 65, "blue", linestyles='dashed')
+        ax.grid(True)
         
         
     def __calc_leading_span(self):
