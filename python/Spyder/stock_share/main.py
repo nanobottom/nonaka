@@ -51,6 +51,8 @@ def main():
             # 週足のローソク足を表示する
             #ss_weekly = StockShareWeekly(code, datetime.date.today().strftime("%Y-%m-%d"))
             #ss_weekly.get_candle_data()
+            
+            
             if (stock_share.is_high_value_for28days() == True):
                 #stock_share.is_over_cloud() == True):
                 #ss_weekly.is_over_cloud() == True):

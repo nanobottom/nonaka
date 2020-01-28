@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 #import matplotlib.finance as finance
 import mpl_finance as finance
 import pandas as pd
+import numpy as np
 from bs4 import BeautifulSoup
 from quotes import Quotes
 
@@ -75,7 +76,7 @@ class StockShare:
         #fig = plt.figure(figsize=(10, 6))
         fig, (ax, ax2) = plt.subplots(2,1, gridspec_kw = {'height_ratios':[3, 1]}, figsize=(10, 6))
         #ax = fig.add_subplot(111)
-        ax.set_title('code:' + str(self.code), loc='center', fontsize=20)
+        ax.set_title('code:' + str(self.code) + "\n[rule]buy in 5 candle from GC at MACD", loc='center', fontsize=20)
         ax.set_xlabel('day')
         ax.set_ylabel('price')
         ax.autoscale_view()
@@ -108,6 +109,7 @@ class StockShare:
         self.__plt_GMMA(ax)
         self.__plt_volume(ax)
         #self.__plt_RSI(ax2)
+        #self.__plt_RCI(ax2)
         self.__plt_MACD(ax2)
         
         #plt.xlim([0, 105])
@@ -271,9 +273,35 @@ class StockShare:
         macd.plot(ax=ax, color="g", alpha=0.5)
         signal.plot(ax=ax, color="r", alpha=0.5)
         ax.hlines([0], 0, 65, "blue", linestyles='dashed')
+        ax.bar(range(len(macd - signal)), macd - signal)
         #ax.hlines([50], 0, 65, "blue", linestyles='dashed')
         ax.grid(True)
         
+    def __plt_RCI(self,ax,timeperiod = 9):
+        rci = []
+        for j in range(len(self.ohcl["close"])):
+            if j < timeperiod:
+                rci.append(np.nan)    
+            else:
+                data = pd.DataFrame()
+                data['close'] = list(self.ohcl["close"][j-timeperiod:j])
+                data = data.reset_index()
+                data = data.rename(columns = {'index':'original_index'}) #最初のindex情報を残しておきます
+                data = data.sort_values('close',ascending=False).reset_index(drop = True) #closeの値が高い順に並べ替えます
+                data = data.reset_index() #indexをresetします
+                data['index'] = [i+1 for i in data['index']] #resetしたindexは0〜8なので、1〜9の順位に変換するために1を足します
+                data = data.rename(columns = {'index':'price_rank'}) #closeの高い順に並べたindexをprice rankという列名にします
+                data = data.set_index('original_index') #元のindexに戻します
+                data = data.sort_index() #元のindexに戻します
+                data['date_rank'] = np.arange(timeperiod,0,-1) #元のindexに日付順位をつけます
+                data['delta'] = [(data.loc[ii,'price_rank']-data.loc[ii,'date_rank'])**2 for ii in range(len(data))] #dの値を計算します
+                d = data['delta'].sum() #dの値を計算します
+                value = (1-(6*d)/(timeperiod**3-timeperiod))*100 #rciを計算します
+                rci.append(value)
+        rci = pd.Series(rci)
+        rci.plot(ax=ax, color="g", alpha=0.5)     
+        ax.grid(True)
+        ax.set(ylim = (-100,100))
         
     def __calc_leading_span(self):
         """一目均衡雲に用いる先行スパンを計算する"""
