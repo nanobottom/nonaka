@@ -26,7 +26,7 @@ class StockShare:
     ルール４「28日間の終値最良日で買う」
     end_date : yyyy-mm-dd形式で記述する
     """
-    def __init__(self, code, end_date = '2019-01-01', term = 100):
+    def __init__(self, code, end_date = '2019-01-01', term = 200):
         self.code = code
         self.end_date = end_date        
         year, month, day = end_date.split('-')
@@ -74,14 +74,15 @@ class StockShare:
         # 動作が重くならないようにクリアする
         plt.clf()
         #fig = plt.figure(figsize=(10, 6))
-        fig, (ax, ax2) = plt.subplots(2,1, gridspec_kw = {'height_ratios':[3, 1]}, figsize=(10, 6))
+        fig, (ax, ax2) = plt.subplots(2,1, gridspec_kw = {'height_ratios':[3, 1]}, figsize=(8, 8))
         #ax = fig.add_subplot(111)
         ax.set_title('code:' + str(self.code) + "\n[rule]buy in 5 candle from GC at MACD", loc='center', fontsize=20)
         ax.set_xlabel('day')
         ax.set_ylabel('price')
         ax.autoscale_view()
-        ax.patch.set_facecolor('k')  # 背景色
-        ax.patch.set_alpha(0.6)  # 透明度
+        ax.grid(True)
+        #ax.patch.set_facecolor('k')  # 背景色
+        #ax.patch.set_alpha(0.6)  # 透明度
  
         finance.candlestick2_ochl(ax, opens=self.ohcl["open"],\
                                       highs=self.ohcl["high"],\
@@ -90,19 +91,8 @@ class StockShare:
                                       width=0.5, colorup='r',\
                                       colordown='g', alpha=0.75) 
                  
-        # 一目均衡雲をプロットする
-        """
-        self.__calc_leading_span()
-        x_data = [x for x in range(26, 26 + len(self._span1))]
-        plt.plot(x_data, self._span1, color="r",alpha=0.5)
-        plt.plot(x_data, self._span2, color="b",alpha=0.5)
-        plt.fill_between(x_data, self._span1, self._span2, 
-                         where=self._span1>self._span2, 
-                         facecolor='r',alpha=0.25)
-        plt.fill_between(x_data, self._span1, self._span2,
-                         where=self._span1<self._span2, 
-                         facecolor='b', alpha=0.25)
-        """
+       
+        self.__plt_ichimoku_cloud(ax)
         self.__plt_bolinger_band(ax)
         self.__plt_envelope(ax)
         self.__plt_upper_support_line(ax)
@@ -112,7 +102,10 @@ class StockShare:
         #self.__plt_RCI(ax2)
         self.__plt_MACD(ax2)
         
-        #plt.xlim([0, 105])
+        #plt.xlim([30,65])
+        ax.set_xlim(80, 135)
+        ax2.set_xlim(80, 135)
+        
         
         plt.grid(True, linestyle='--', color='0.75')
               
@@ -190,6 +183,22 @@ class StockShare:
                 self.ohcl["volume"].append(_target.volume)
                 self.ohcl["close"].append(_current_price)
                 
+    
+    def __plt_ichimoku_cloud(self, ax):
+        # 一目均衡雲をプロットする
+        
+        self.__calc_leading_span()
+        x_data = [x for x in range(26, 26 + len(self._span1))]
+        ax.plot(x_data, self._span1, color="r",alpha=0.5)
+        ax.plot(x_data, self._span2, color="b",alpha=0.5)
+        ax.fill_between(x_data, self._span1, self._span2, 
+                         where=self._span1>self._span2, 
+                         facecolor='r',alpha=0.25)
+        ax.fill_between(x_data, self._span1, self._span2,
+                         where=self._span1<self._span2, 
+                         facecolor='b', alpha=0.25)
+           
+                
         
     def __plt_bolinger_band(self, ax):
         _series = pd.Series(self.ohcl["close"])
@@ -262,8 +271,19 @@ class StockShare:
         RS = up_sma_14 / down_sma_14
         RSI = 100.0 - (100.0 / (1.0 + RS))
         RSI.plot(ax=ax, color="c", alpha=0.5)
-        ax.set(ylim = (0,100))
+        #ax.set(ylim = (0,100))
         ax.grid(True)
+        
+        _series = pd.Series(RSI)
+        # 移動平均線
+        base = _series.rolling(window = 20).mean()
+        base.plot(ax=ax, color="r", alpha=0.75)
+        # シグマ
+        _sigma = _series.rolling(window = 20).std(ddof = 0)
+        _SIGMA_RATES = [3, 2, -2, -3]
+        for _rate in _SIGMA_RATES:
+            sigma_line  = base + _sigma * _rate
+            sigma_line.plot(ax=ax, ls="--", color="r",alpha=0.75)
         
     def __plt_MACD(self, ax):
         ewm_short = pd.Series(self.ohcl["close"]).ewm(span=12).mean()
