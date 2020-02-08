@@ -1,0 +1,9 @@
+-cpu=300HN
+-lang=c
+-object="D:\cygwin64\home\ryo\c_language\BeutoRover\main\Debug\intprg.obj"
+-outcode=sjis
+-debug
+-nolist
+-chgincpath
+"D:\cygwin64\home\ryo\c_language\BeutoRover\main\intprg.c"
+-nologo
