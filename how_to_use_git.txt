@@ -51,3 +51,5 @@ $ git commit -m "メッセージ"
 4. プッシュ
 $ git push origin master
 
+# 最新のコードに更新する
+$ git pull origin master
