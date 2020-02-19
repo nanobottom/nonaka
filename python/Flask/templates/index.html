@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
+	<meta charset="UTF-8"/>
 	<title>画像を表示する</title>
 </head>
 <body>
-	<h1>画像の表示</h1>
+	<h1>{{today}}</h1>
 		{% for image in images %}
 		<h2>{{image}}</h2>
 		<img src="/static/{{image}}">
