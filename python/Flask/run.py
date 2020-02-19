@@ -21,6 +21,8 @@ if __name__ == '__main__':
     # 画像ファイル名をリストとして取得する
     images = os.listdir(path='./static/')
     # staticディレクトリ内の画像ファイルを削除する
-    for image in images:
-        os.remove('./static/' + image)
-    print('staticディレクトリ内の画像ファイルをすべて削除しました。')
+    is_del_img = input('static内の画像を削除(y/n)>>')
+    if is_del_img == 'y':   
+        for image in images:
+            os.remove('./static/' + image)
+        print('staticディレクトリ内の画像ファイルをすべて削除しました。')
