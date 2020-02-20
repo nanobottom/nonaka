@@ -5,7 +5,7 @@ class WebData:
     def __init__(self):
        self.data = bytearray()
 
-    def __str__(self):
+    def hexdump_data(self):
         """データをバイト列と文字(hexdump -C形式)で表示する"""
 
         # バイト列の座標を表示する
@@ -26,7 +26,7 @@ class WebData:
             elif i % 8 == 0:
                 s += ' '
             # 最後のスペースを整形する
-            if len(data) == i:
+            if len(self.data) == i:
                 if (16 - i % 16) < 8:
                     add_space = ''
                 else:
@@ -36,7 +36,7 @@ class WebData:
                 a += ' ' * (16 - i % 16)
                 a += '|'
                 s += a
-        return s
+        print(s)
     
     def get_data_as_little_endian(self, offset, size):
         """
@@ -166,4 +166,4 @@ if __name__ == '__main__':
     print('期待値：abc')
     print(web_data.get_data_as_str(6, 3))
     print('---hexdump data---')
-    print(web_data)
+    web_data.hexdump_data()
