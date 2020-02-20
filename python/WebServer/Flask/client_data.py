@@ -42,5 +42,6 @@ class ClientRequestData(WebData):
         birthday = conf.get('request', 'birthday')
         self.set_data_as_str(offset, size, birthday)
         # bytearrayをファイルオブジェクトとして扱うためにio.BytesIOを使用する
-        return io.BytesIO(self.data)
+        #return io.BytesIO(self.data)
+        return self.data
 

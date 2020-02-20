@@ -5,39 +5,38 @@ class WebData:
     def __init__(self):
        self.data = bytearray()
 
-    def hexdump_data(self):
+    def __str__(self):
         """データをバイト列と文字(hexdump -C形式)で表示する"""
 
         # バイト列の座標を表示する
-        print("%08X  " % 0, end="")
-        s = "|"
+        s = str()
+        a = '|' # ASCII文字部
+        s += '{0:08X}  '.format(0)
         for i, byte in enumerate(self.data, start=1):
-            print("%02X " % byte, end="") 
+            s += '{0:02X} '.format(byte)
             # ASCII文字の範囲外なら' '文字を表示
-            if byte in range(32, 127): 
-                s += chr(byte)
+            if byte in range(32, 127):
+                a += chr(byte)
             else:
-                s += "."
-            
-            # スペースと座標、文字部分を整形する 
+                a += '.'
+            # iが16の倍数でASCII部を追加する
             if i % 16 == 0:
-                s += "|"
-                print(" %s\n%08X  " % (s, i), end="")
-                s = '|'
+                s += '{0}|\n{1:08X}  '.format(a, i)
+                a = '|' # aをクリア
             elif i % 8 == 0:
-                print(" ", end="")
-
+                s += ' '
             # 最後のスペースを整形する
-            if len(self.data) == i :
-                if  (16 - i % 16) < 8:
-                    add_space = " "
+            if len(data) == i:
+                if (16 - i % 16) < 8:
+                    add_space = ''
                 else:
-                    add_space = "  "
-                space = "   " * (16 - i % 16) + add_space
-                s += " " * (16 - i % 16)
-                s += "|" 
-                print(space, end="")
-                print(s)
+                    add_space = ' '
+                s += '   ' * (16 - i % 16)
+                s += add_space
+                a += ' ' * (16 - i % 16)
+                a += '|'
+                s += a
+        return s
     
     def get_data_as_little_endian(self, offset, size):
         """
@@ -167,4 +166,4 @@ if __name__ == '__main__':
     print('期待値：abc')
     print(web_data.get_data_as_str(6, 3))
     print('---hexdump data---')
-    web_data.hexdump_data()
+    print(web_data)

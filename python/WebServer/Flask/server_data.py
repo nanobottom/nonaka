@@ -218,5 +218,5 @@ if __name__ == '__main__':
     res.set_data_as_little_endian(10, 2, "1234")
     print(res.get_data_as_little_endian(0, 5)+"$")
     print(res.get_data_as_str(0, 10))
-    res.hexdump_data()
+    print(res)
 

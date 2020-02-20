@@ -19,8 +19,12 @@ response_data = ServerResponseData()
 def index():
     return "Hello World!"
 
-@app.route("/post", methods = ["POST"])
-def post():
+@app.route("/test", methods = ["POST"])
+def test():
+    """
+    client.pyからリクエストデータを受信して
+    レスポンスを送信する
+    """
     # リクエストデータを画面に表示する
     request_data = ServerRequestData(request)
     request_data.display_header_info()
@@ -41,14 +45,26 @@ def post():
 
 @app.route("/setting_post", methods = ["GET", "POST"])
 def setting_post():
+    """
+    clientに送信するレスポンスデータをブラウザ上で
+    設定できるようにする。
+    空白の場合はconfig.iniに記載されているデータを送信する
+    """
+    # レスポンスデータを入力するフォーム
     if request.method == "GET":
         return render_template("setting_post.html")
+    # データ情報をresponse_dataに反映させ、送信が完了した
+    # 通知をブラウザ上に表示する
     elif request.method == "POST":
         response_data.store_data()
-        response_data.set_name(request.form["name"])
-        response_data.set_address(request.form["address"])
-        response_data.set_age(request.form["age"])
-        response_data.set_birthday(request.form["birthday"])
+        if request.form['name'] != '':
+            response_data.set_name(request.form["name"])
+        if request.form['address'] != '':
+            response_data.set_address(request.form["address"])
+        if request.form['age'] != '':
+            response_data.set_age(request.form["age"])
+        if request.form['birthday'] != '':
+            response_data.set_birthday(request.form["birthday"])
         response_data.is_setting_from_web = 1
         return render_template("fin_setting_post.html")
 
