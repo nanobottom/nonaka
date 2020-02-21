@@ -16,13 +16,13 @@ conf.read(conf_path, 'UTF-8')
 
 class ServerRequestData(WebData):
 
-    def __init__(self, request = 0):
-        self.request = request
-        self.data = request.data
+    def __init__(self, requests_instance):
+        super().__init__(requests_instance)
+        self.request = requests_instance
+        self.data = requests_instance.data
         self.response_status_code = 200
 
     def display_header_info(self):
-        
         print('---<Request header>---')
         print('Message data:')
         self.hexdump_data()
@@ -125,10 +125,10 @@ class ResponseJSONData:
 """
 class ServerResponseData(WebData):
 
-    def __init__(self, response = 0):
-        WebData.__init__(self)
-        self.response = response
+    def __init__(self, requests_instance = None):
+        super().__init__(requests_instance)
         self.data_size = 222
+        self.response = requests_instance
         self.data = bytearray(self.data_size)
         self.is_setting_from_web = 0
 

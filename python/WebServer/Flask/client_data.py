@@ -16,8 +16,8 @@ conf.read(conf_path, 'UTF-8')
 
 class ClientRequestData(WebData):
 
-    def __init__(self, request = 0):
-        self.request = request
+    def __init__(self, requests_instance = None):
+        super().__init__(requests_instance)
         self.data_size = 222
         self.data = bytearray(self.data_size)
 
@@ -45,3 +45,19 @@ class ClientRequestData(WebData):
         #return io.BytesIO(self.data)
         return self.data
 
+class ClientResponseData(WebData):
+    """
+    クライアントのレスポンスデータを
+    格納し、表示する機能を持つ
+    """
+    def __init__(self, requests_instance):
+        super().__init__(requests_instance)
+        self.response = requests_instance
+        self.data = requests_instance.content
+
+    def display_header_info(self):
+        print('URL               : {} '.format(self.response.url))
+        print('Status code       : {} '.format(self.response.status_code))
+        print('Date              : {} '.format(self.response.headers['date']))
+        print('Server            : {} '.format(self.response.headers['server']))
+        print('Content-Type      : {} '.format(self.response.headers['content-type']))

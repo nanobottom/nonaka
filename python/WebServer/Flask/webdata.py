@@ -1,9 +1,9 @@
 class WebData:
     """
-    サーバが受信したデータ、送信するデータを扱う
+    サーバ、クライアントが受信したデータ、送信するデータを扱う
     """
-    def __init__(self):
-       self.data = bytearray()
+    def __init__(self, requests_instance = None):
+        self.requests_instance = requests_instance# requestsパッケージのインスタンス
 
     def hexdump_data(self):
         """データをバイト列と文字(hexdump -C形式)で表示する"""
