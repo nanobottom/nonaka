@@ -27,20 +27,24 @@ class devidePdf:
         for page_num in range(self.devide_page, self.src.numPages):
             self.dst2.addPage(self.src.getPage(page_num))
 
-    def save_pdfs(self):
         with open(self.dst1_filename, 'wb') as dst1_pdf:
             self.dst1.write(dst1_pdf)
 
         with open(self.dst2_filename, 'wb') as dst2_pdf:
             self.dst2.write(dst2_pdf)
 
+    def devide_each_pdf(self):
+        """対象のPDFを全ページ分割する"""
+        for page_num in range(self.src.numPages):
+            dst = PdfFileWriter()
+            dst.addPage(self.src.getPage(page_num))
+            with open('output' + str(page_num) + '.pdf', 'wb') as dst_pdf:
+                dst.write(dst_pdf)
+
 
 if __name__ == '__main__':
     devide_pdf = devidePdf()
     devide_pdf.read_pdf()
     devide_pdf.devide_pdf()
-    devide_pdf.save_pdfs()
+    #devide_pdf.devide_each_pdf()
         
-
-
-
