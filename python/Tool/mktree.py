@@ -1,14 +1,16 @@
 import os
+import platform
 import zipfile
 from datetime import date
 class Tree():
 
     def __init__(self):
-        self.search_path = '/home/nanob/git/nonaka/python/WebServer'
+        self.search_path = 'C:/cygwin64/home/nanob/git'
         self.tree = dict()
         self.tree_str = str()
         # 保存するファイル名を作成する
-        pc_name = os.uname().nodename
+        #pc_name = os.uname().nodename
+        pc_name = platform.uname().node
         name = '野中'
         today = date.today().strftime('%Y%m%d')
         self.filename = today + name + '_' + pc_name + '_tree.txt'
