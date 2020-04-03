@@ -176,7 +176,7 @@ class CryptoCurrencyCandle:
     
 if __name__ == "__main__":
     #date = datetime.date.today().strftime("%Y-%m-%d")
-    date = "2018-02-15"
+    date = "2018-01-01"
     crypto_candle = CryptoCurrencyCandle("xrp_jpy",date)
     crypto_candle.get_candle_data()
     crypto_candle.plt()
