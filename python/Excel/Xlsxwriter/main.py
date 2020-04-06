@@ -1,7 +1,7 @@
 import xlsxwriter, datetime, locale, calendar, jholiday, os
 from openpyxl.utils import get_column_letter
 from editcell import EditCell
-current_year = 2018
+current_year = 2020
 current_month = 4
 fin_month_interval = 1
 white_row_num = 30
@@ -200,6 +200,7 @@ ws.freeze_panes(0, main_column_num)
 
 date = datetime.datetime(current_year, current_month, 1)
 column_count = main_column_num + 1
+total_days = 0
 for i_month in range(current_month, current_month + fin_month_interval):
     move_up_year = i_month // 12
     if move_up_year > 0 and i_month % 12 != 0:
@@ -207,6 +208,7 @@ for i_month in range(current_month, current_month + fin_month_interval):
     (_, last_day) = calendar.monthrange(current_year + move_up_year, i_month)
 
     for i_day in range(1,last_day + 1):
+        total_days += 1
         # 年月日を取得する
         year = date.year
         month = date.month
@@ -269,6 +271,8 @@ for i_row in range(4,white_row_num + 4):
     numerical_formula_sum ='=SUM(I'+str(i_row)+':'+get_column_letter(column_count - 1)+str(i_row)+')'
     ws.write(i_row - 1, 6, numerical_formula_sum, white.fmt)
 
+
+
 # プロジェクト毎の工数を算出する
 for i_project in range(1, project_num + 1):
     numerical_formula_sumif = '=SUMIF(A4:A' + str(white_row_num + 4) + ',' + str(i_project) + ',G4:G' + str(white_row_num + 4) + ')'
@@ -291,5 +295,17 @@ for i_row in range(4,white_row_num + 4):
     status_cell.edit_alignment()
     status_cell.edit_border_round()
     status_cell.regulate_input_str(['未着手', '進行中', '完了'])
+# 1日毎の工数の合計を算出する
+total_cell = EditCell(wb, ws, 2, 4, value='合計')
+total_cell.edit_alignment()
+numerical_formula = '=SUM(G5:G'+str(4 + white_row_num - 1)+')'
+kousu_cell = EditCell(wb, ws, 7, 4, numerical_formula)
+kousu_cell.edit_alignment()
+
+for i_column in range(9, total_days + 9):
+    numerical_formula = '=SUM(' + get_column_letter(i_column) + '5:' + get_column_letter(i_column) + str(4 + white_row_num - 1) + ')'
+    current_cell = EditCell(wb, ws, i_column, 4, numerical_formula)
+    current_cell.edit_border_round()
+
 wb.close()
 print('Finish!')
