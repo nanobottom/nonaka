@@ -6,7 +6,8 @@ current_month = 4
 fin_month_interval = 1
 white_row_num = 30
 main_column_num = 8
-project_num = 3
+project_num = 5
+font_name = 'meiryo'
 filename = '進捗管理表.xlsx'
 
 
@@ -38,7 +39,7 @@ ws = wb.add_worksheet(sheet_name)
 # 番号(A1)のセル編集
 ws.merge_range("A1:A3", 'Merged Range')
 a1 = EditCell(wb, ws, 1, 1, '番号')
-a1.edit_font(bold = True)
+a1.edit_font(font_name, bold = True)
 a1.edit_border_left()
 a1.edit_border_top()
 a1.edit_border_right()
@@ -58,7 +59,7 @@ a3.edit_border_bottom()
 # 項目(B1)のセル編集
 ws.merge_range("B1:B3", 'Merged Range')
 b1 = EditCell(wb, ws, 2, 1, '項目')
-b1.edit_font(bold = True)
+b1.edit_font(font_name, bold = True)
 b1.edit_border_left()
 b1.edit_border_top()
 b1.edit_border_right()
@@ -77,7 +78,7 @@ b3.edit_border_bottom()
 # 予定(C1)のセル編集
 ws.merge_range("C1:D2", 'Merged Range')
 c1 = EditCell(wb, ws, 3, 1, '予定')
-c1.edit_font(bold = True)
+c1.edit_font(font_name, bold = True)
 c1.edit_border_left()
 c1.edit_border_top()
 c1.edit_fill(fgColor = 'cyan')
@@ -98,7 +99,7 @@ d2.edit_border_bottom()
 # 実績(E1)のセル編集
 ws.merge_range("E1:F2", 'Merged Range')
 e1 = EditCell(wb, ws, 5, 1, '実績')
-e1.edit_font(bold = True)
+e1.edit_font(font_name, bold = True)
 e1.edit_border_left()
 e1.edit_border_top()
 e1.edit_fill(fgColor = 'cyan')
@@ -118,7 +119,7 @@ f2.edit_border_bottom()
 
 #開始(C3)のセル編集
 c3 = EditCell(wb, ws, 3, 3, '開始')
-c3.edit_font(bold = True)
+c3.edit_font(font_name, bold = True)
 c3.edit_fill(fgColor = 'cyan')
 c3.edit_height_width(width = 6)
 c3.edit_alignment()
@@ -126,7 +127,7 @@ c3.edit_border_round()
 
 #終了(D3)のセル編集
 d3 = EditCell(wb, ws, 4, 3, '終了')
-d3.edit_font(bold = True)
+d3.edit_font(font_name, bold = True)
 d3.edit_fill(fgColor = 'cyan')
 d3.edit_height_width(width = 6)
 d3.edit_alignment()
@@ -134,7 +135,7 @@ d3.edit_border_round()
 
 #開始(E3)のセル編集
 e3 = EditCell(wb, ws, 5, 3, '開始')
-e3.edit_font(bold = True)
+e3.edit_font(font_name, bold = True)
 e3.edit_fill(fgColor = 'cyan')
 e3.edit_height_width(width = 6)
 e3.edit_alignment()
@@ -142,7 +143,7 @@ e3.edit_border_round()
 
 #終了(F3)のセル編集
 f3 = EditCell(wb, ws, 6, 3, '終了')
-f3.edit_font(bold = True)
+f3.edit_font(font_name, bold = True)
 f3.edit_fill(fgColor = 'cyan')
 f3.edit_height_width(width = 6)
 f3.edit_alignment()
@@ -151,7 +152,7 @@ f3.edit_border_round()
 #工数(G1)のセル編集
 ws.merge_range("G1:G3", 'Merged Range')
 g1 = EditCell(wb, ws, 7, 1, '工数')
-g1.edit_font(bold = True)
+g1.edit_font(font_name, bold = True)
 g1.edit_border_left()
 g1.edit_border_top()
 g1.edit_border_right()
@@ -171,7 +172,7 @@ g3.edit_border_bottom()
 #状態(H1)のセル編集
 ws.merge_range("H1:H3", 'Merged Range')
 h1 = EditCell(wb, ws, 8, 1, '状態')
-h1.edit_font(bold = True)
+h1.edit_font(font_name, bold = True)
 h1.edit_border_left()
 h1.edit_border_top()
 h1.edit_border_right()
@@ -188,9 +189,10 @@ h3.edit_border_right()
 h3.edit_border_bottom()
 
 #白枠（4行目以降）の編集
-for i_row in range(4, white_row_num + 4):
+for i_row in range(4, white_row_num + project_num + 5):
     for i_column in range(1, main_column_num + 1):
         white = EditCell(wb, ws, i_column, i_row)
+        white.edit_font(font_name)
         white.edit_fill(fgColor = 'white')
         white.edit_alignment()
         white.edit_border_round()
@@ -230,10 +232,11 @@ for i_month in range(current_month, current_month + fin_month_interval):
                 ws.merge_range(get_column_letter(column_count) + '1:' + get_column_letter(column_count + 1) + '1', 'Merged Range')
                 month_title = str(month) + '月'
             i1= EditCell(wb, ws, column_count, 1, month_title)
+            i1.edit_font(font_name)
             i1.edit_border_left()
         else:
             i1= EditCell(wb, ws, column_count, 1)
-        i1.edit_font(bold = True)
+        i1.edit_font(font_name, bold = True)
         i1.edit_fill(fgColor = 'orange')
         i1.edit_height_width(width = 4)
         i1.edit_alignment()
@@ -241,23 +244,24 @@ for i_month in range(current_month, current_month + fin_month_interval):
         #土曜日なら青、日曜日、祝日なら赤、それ以外は黄色にして日付と曜日を表示させる
         ans_color = is_sat_sun_holiday(date, 'yellow')
         i2= EditCell(wb, ws, column_count, 2, str(day))
-        i2.edit_font(bold = True)
+        i2.edit_font(font_name, bold = True)
         i2.edit_fill(fgColor = ans_color)
         i2.edit_height_width(width = 4)
         i2.edit_alignment()
         i2.edit_border_round()
 
         i3 = EditCell(wb, ws, column_count, 3, day_of_the_week)
-        i3.edit_font(bold = True)
+        i3.edit_font(font_name, bold = True)
         i3.edit_fill(fgColor = ans_color)
         i3.edit_height_width(width = 4)
         i3.edit_alignment()
         i3.edit_border_round()
 
         #白枠（4行目以降）の編集(土日祝で色を変更する)
-        for i_row in range(4, white_row_num + 4):
+        for i_row in range(4, white_row_num + project_num + 5):
             ans_color = is_sat_sun_holiday(date, 'white')
             white_cell = EditCell(wb, ws, column_count, i_row)
+            white_cell.edit_font(font_name)
             white_cell.edit_fill(fgColor = ans_color)
             white_cell.edit_height_width(width = 4)
             white_cell.edit_alignment()
@@ -267,12 +271,16 @@ for i_month in range(current_month, current_month + fin_month_interval):
         column_count += 1
     current_month += 1
 # 工数の数式（全日程の時間の合計を算出する）を代入する
-for i_row in range(4,white_row_num + 4):
+for i_row in range(5, white_row_num + project_num + 5):
     numerical_formula_sum ='=SUM(I'+str(i_row)+':'+get_column_letter(column_count - 1)+str(i_row)+')'
-    ws.write(i_row - 1, 6, numerical_formula_sum, white.fmt)
+    total_time_cell = EditCell(wb, ws, 7, i_row, numerical_formula_sum)
+    total_time_cell.edit_font(font_name)
+    total_time_cell.edit_alignment()
+    total_time_cell.edit_border_round()
+    #ws.write(i_row - 1, 6, numerical_formula_sum, white.fmt)
 
 
-
+"""
 # プロジェクト毎の工数を算出する
 for i_project in range(1, project_num + 1):
     numerical_formula_sumif = '=SUMIF(A4:A' + str(white_row_num + 4) + ',' + str(i_project) + ',G4:G' + str(white_row_num + 4) + ')'
@@ -287,25 +295,46 @@ for i_project in range(1, project_num + 1):
     nf_cell.edit_fill(fgColor = 'white')
     nf_cell.edit_alignment()
     nf_cell.edit_border_round()
-
+"""
 # 状態のプルダウンリストを作成する
 for i_row in range(4,white_row_num + 4):
     status_cell = EditCell(wb, ws, 8, i_row)
+    status_cell.edit_font(font_name)
     status_cell.edit_fill(fgColor = 'white')
     status_cell.edit_alignment()
     status_cell.edit_border_round()
     status_cell.regulate_input_str(['未着手', '進行中', '完了'])
 # 1日毎の工数の合計を算出する
 total_cell = EditCell(wb, ws, 2, 4, value='合計')
+total_cell.edit_font(font_name)
 total_cell.edit_alignment()
 numerical_formula = '=SUM(G5:G'+str(4 + white_row_num - 1)+')'
 kousu_cell = EditCell(wb, ws, 7, 4, numerical_formula)
+kousu_cell.edit_font(font_name)
 kousu_cell.edit_alignment()
 
 for i_column in range(9, total_days + 9):
-    numerical_formula = '=SUM(' + get_column_letter(i_column) + '5:' + get_column_letter(i_column) + str(4 + white_row_num - 1) + ')'
+    numerical_formula = '=SUM(' + get_column_letter(i_column) + str(5 + project_num) + ':' + get_column_letter(i_column) + str(5 + project_num + white_row_num - 1) + ')'
     current_cell = EditCell(wb, ws, i_column, 4, numerical_formula)
+    current_cell.edit_font(font_name)
     current_cell.edit_border_round()
+    current_cell.edit_alignment()
 
+# プロジェクト毎の工数の合計を計算する
+for i_row in range(5, project_num + 5):
+    # プロジェクトのタイトルを記入する
+    project_cell = EditCell(wb, ws, 2, i_row, 'PJ' + str(i_row - 4))
+    project_cell.edit_font(font_name)
+    project_cell.edit_alignment()
+    project_cell.edit_border_round()
+    
+    # 各々の日のプロジェクト毎の工数の合計を計算する
+    for i_column in range(9, total_days + 9):
+        numerical_formula_sumif = '=SUMIF(A' + str(5 + project_num) +':A' + str(white_row_num + project_num + 5) + ',' + str(i_row - 4) + ',' + get_column_letter(i_column) + str(5 + project_num) + ':'+ get_column_letter(i_column) + str(white_row_num + project_num + 5) + ')'
+
+        nf_cell = EditCell(wb, ws, i_column, i_row, numerical_formula_sumif)
+        nf_cell.edit_font(font_name)
+        nf_cell.edit_alignment()
+        nf_cell.edit_border_round()
 wb.close()
 print('Finish!')
