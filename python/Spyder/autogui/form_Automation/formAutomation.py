@@ -3,6 +3,8 @@ import pyautogui
 import webbrowser
 import csv
 import time
+import codecs
+import pyperclip
 import os
 import openpyxl
 from PIL import ImageGrab
@@ -53,8 +55,8 @@ class FormAutomation:
 
     def read_csv_file(self):
         keys = list()
-        with open(self.SPREADSHEET_NAME, mode='rU') as infile:
-            reader = csv.reader(infile)
+        with open(self.SPREADSHEET_NAME, 'rU', encoding='cp932') as f:
+            reader = csv.reader(f)
             for i, rows in enumerate(reader):
                 form_data = dict()
                 for j, column in enumerate(rows):
@@ -114,12 +116,18 @@ class FormAutomation:
                 locate_screen = pyautogui.locateOnScreen(os.path.join('position_picture', '001_name.png'))
             pyautogui.click(pyautogui.center(locate_screen))
             """
-            pyautogui.typewrite(form_data['name'], interval=self.WRITE_SPEED)
-            pyautogui.typewrite(['enter', '\t'], interval=self.WRITE_SPEED)
+            pyperclip.copy(form_data['name'])
+            pyautogui.hotkey('ctrl', 'v')
+            time.sleep(0.5)
+            #pyautogui.typewrite(form_data['name'], interval=self.WRITE_SPEED)
+            pyautogui.typewrite('\t', interval=self.WRITE_SPEED)
             time.sleep(0.5)
             # Greatest Fear(s)欄を入力する
-            pyautogui.typewrite(form_data['fear'], interval=self.WRITE_SPEED)
-            pyautogui.typewrite(['enter', '\t'], interval=self.WRITE_SPEED)
+            pyperclip.copy(form_data['fear'])
+            pyautogui.hotkey('ctrl', 'v')
+            time.sleep(0.5)
+            #pyautogui.typewrite(form_data['fear'], interval=self.WRITE_SPEED)
+            pyautogui.typewrite('\t', interval=self.WRITE_SPEED)
             # Source of Wizard Powers欄を入力する
             if form_data['source'] == 'wand':
                 pyautogui.typewrite(['down', 'enter', '\t'], interval=self.WRITE_SPEED)
@@ -142,8 +150,11 @@ class FormAutomation:
                 pyautogui.typewrite(['right', 'right', 'right', 'right', '\t'], interval=self.WRITE_SPEED)
             # Additional Comments欄を入力する
             time.sleep(0.5)
-            pyautogui.typewrite(form_data['comments'], interval=self.WRITE_SPEED)
-            pyautogui.typewrite(['enter' , '\t'], interval=self.WRITE_SPEED)
+            pyperclip.copy(form_data['comments'])
+            pyautogui.hotkey('ctrl', 'v')
+            time.sleep(0.5)
+            #pyautogui.typewrite(form_data['comments'], interval=self.WRITE_SPEED)
+            pyautogui.typewrite('\t', interval=self.WRITE_SPEED)
             # 画面全体を表示させ、スクリーンショットを撮る
             time.sleep(3)
             ImageGrab.grab().save(os.path.join('screenshot', form_data['name'] + '.png'))
@@ -155,7 +166,7 @@ class FormAutomation:
             time.sleep(2)
             # Submit another responseリンクをクリックする
             pyautogui.click(self.SUBMIT_ANOTHER_LINK[0], self.SUBMIT_ANOTHER_LINK[1])
-            
+        pyautogui.alert('処理が完了しました。')
             
             
             
@@ -179,7 +190,7 @@ if __name__ == '__main__':
     form_automation = FormAutomation()
     form_automation.open_target_form()
     form_automation.resolution_check()
-    form_automation.read_excel()
+    #form_automation.read_excel()
     form_automation.read_csv_file()
     form_automation.display_attention()
     form_automation.input_form()
