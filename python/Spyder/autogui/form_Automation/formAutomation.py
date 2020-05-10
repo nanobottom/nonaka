@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pyautogui
 import webbrowser
+import csv
 import time
 import os
 import openpyxl
@@ -16,6 +17,7 @@ class FormAutomation:
         #self.TARGET_URL = ''
         self.SPREADSHEET_NAME = 'form_data.xlsx'
         self.WAIT_TIME = 5
+        # +:上方向、-:下方向
         self.SCROLL_NUM = -200
         self.WRITE_SPEED = 0.5
         self.NAME_FIELD = (743, 367)
@@ -34,7 +36,7 @@ class FormAutomation:
         # スクリーンショット用のフォルダを作成する
         os.makedirs('screenshot', exist_ok=True)
     
-    def read_spreadsheet(self):
+    def read_excel(self):
         wb = openpyxl.load_workbook(self.SPREADSHEET_NAME)
         ws = wb.get_sheet_by_name(wb.get_sheet_names()[0])
         title = list()
@@ -48,6 +50,22 @@ class FormAutomation:
             if row_num != 1:
                 self.form_datas.append(form_data)
         print(self.form_datas)
+
+    def read_csv_file(self):
+        keys = list()
+        with open(self.SPREADSHEET_NAME, mode='rU') as infile:
+            reader = csv.reader(infile)
+            for i, rows in enumerate(reader):
+                form_data = dict()
+                for j, column in enumerate(rows):
+                    if i == 0:
+                        keys.append(column)
+                    else:
+                        form_data[keys[j]] = column
+                if i != 0:
+                    self.form_datas.append(form_data)
+        print(self.form_datas)
+
  
     def display_attention(self):
         # カーソルを左上に持っていくかctrl+alt+delでログアウトすればストップできることを表示する
@@ -161,6 +179,7 @@ if __name__ == '__main__':
     form_automation = FormAutomation()
     form_automation.open_target_form()
     form_automation.resolution_check()
-    form_automation.read_spreadsheet()
+    form_automation.read_excel()
+    form_automation.read_csv_file()
     form_automation.display_attention()
     form_automation.input_form()
